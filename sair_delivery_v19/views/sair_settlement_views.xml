@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sair_settlement_form" model="ir.ui.view">
+        <field name="name">sair.settlement.form</field>
+        <field name="model">sair.settlement</field>
+        <field name="arch" type="xml">
+            <form string="تسوية شهرية">
+                <header>
+                    <button name="action_load_data"
+                            string="تحميل بيانات الفترة"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_confirm"
+                            string="تأكيد التسوية"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_register_payment"
+                            string="تسجيل دفع للشريك"
+                            type="object" class="btn-primary"
+                            invisible="state != 'waiting_payment'"/>
+                    <button name="action_print_settlement"
+                            string="طباعة كشف التسوية"
+                            type="object" class="btn-secondary"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,waiting_payment,confirmed,paid"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_move"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-book"
+                                invisible="not invoice_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">قيد الاستحقاق</span>
+                            </div>
+                        </button>
+                        <button name="action_view_payment"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-money"
+                                invisible="not payment_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">سند الدفع</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                            <span> — </span>
+                            <field name="month_year" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="بيانات السائق">
+                            <field name="driver_type"/>
+                            <field name="partner_id"
+                                   string="السائق"
+                                   required="1"/>
+                            <field name="driver_display" readonly="1" invisible="not driver_display"/>
+                        </group>
+                        <group string="فترة التسوية">
+                            <field name="settlement_month"/>
+                            <field name="settlement_year"/>
+                            <field name="confirmed_by"   readonly="1" invisible="not confirmed_by"/>
+                            <field name="confirmed_date" readonly="1" invisible="not confirmed_date"/>
+                        </group>
+                    </group>
+
+                    <!-- ملخص التسوية -->
+                                        <!-- ملخص التسوية -->
+                    <group string="ملخص التسوية" col="4">
+                        <group string="الإيراد / العمولات">
+                            <field name="total_revenue" readonly="1"/>
+                            <field name="driver_revenue_share" readonly="1"
+                                   string="حصة السائق (50%)"
+                                   invisible="driver_type != 'external'"/>
+                            <field name="company_revenue_share" readonly="1"
+                                   string="حصة الشركة (50%)"
+                                   invisible="driver_type != 'external'"/>
+                            <field name="driver_revenue_share" readonly="1"
+                                   string="عمولة السائق"
+                                   invisible="driver_type != 'commission'"/>
+                            <field name="company_revenue_share" readonly="1"
+                                   string="عمولة الشركة"
+                                   invisible="driver_type != 'commission'"/>
+                            <field name="office_commission" readonly="1"
+                                   string="عمولة المكتب"
+                                   invisible="driver_type != 'commission'"/>
+                        </group>
+                        <group string="المصاريف">
+                            <field name="total_expenses" readonly="1"/>
+                            <field name="company_expense_share" readonly="1" string="على الشركة"/>
+                            <field name="driver_expense_share" readonly="1"
+                                   string="على السائق"
+                                   invisible="driver_type == 'internal'"/>
+                        </group>
+                        <group string="العهد والخصومات">
+                            <field name="total_amana" readonly="1" string="عهد من العميل (تسوية رقمية)"/>
+
+                        </group>
+                        <group string="الصافي">
+                            <field name="net_to_driver" readonly="1"
+                                   string="مستحقات السائق"
+                                   invisible="driver_type == 'internal'"/>
+                            <field name="net_to_driver" readonly="1"
+                                   string="مستحقات مصاريف للسائق"
+                                   invisible="driver_type != 'internal'"/>
+                            <field name="net_to_company" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="الرحلات" name="trips">
+                            <field name="trip_ids" readonly="1">
+                                <list>
+                                    <field name="trip_date"/>
+                                    <field name="name" string="رقم الرحلة"/>
+                                    <field name="trip_type"/>
+                                    <field name="description"/>
+                                    <field name="trip_amount"       sum="الإجمالي"/>
+                                    <field name="driver_commission" sum="عمولة السائق"
+                                           invisible="parent.driver_type != 'commission'"/>
+                                    <field name="company_commission" sum="عمولة الشركة"
+                                           invisible="parent.driver_type != 'commission'"/>
+                                    <field name="driver_share"     sum="حصة السائق 50%"
+                                           invisible="parent.driver_type != 'external'"/>
+                                    <field name="company_share"    sum="حصة الشركة 50%"
+                                           invisible="parent.driver_type != 'external'"/>
+                                    <field name="cash_collected"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="العهدات المستلمة من العميل" name="amanas">
+                            <field name="amana_ids" readonly="1">
+                                <list>
+                                    <field name="amana_date"/>
+                                    <field name="name" string="رقم العهدة"/>
+                                    <field name="amount" sum="إجمالي العهد"/>
+                                    <field name="notes"/>
+                                    <field name="state" widget="badge"
+                                           decoration-warning="state=='pending'"
+                                           decoration-success="state=='settled'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="المصاريف" name="expenses">
+                            <field name="expense_ids" readonly="1">
+                                <list>
+                                    <field name="expense_date"/>
+                                    <field name="expense_type"/>
+                                    <field name="description"/>
+                                    <field name="amount"                sum="الإجمالي"/>
+                                    <field name="driver_expense_share"  sum="على السائق"/>
+                                    <field name="company_expense_share" sum="على الشركة"/>
+                                    <field name="analytic_account_id"   string="مركز التكلفة"/>
+                                    <field name="move_id" string="قيد"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="المحاسبة" name="accounting">
+                            <group>
+                                <field name="invoice_id" readonly="1" string="قيد الاستحقاق"/>
+                                <field name="payment_id" readonly="1" string="سند الدفع"/>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <field name="notes" placeholder="ملاحظات..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sair_settlement_list" model="ir.ui.view">
+        <field name="name">sair.settlement.list</field>
+        <field name="model">sair.settlement</field>
+        <field name="arch" type="xml">
+            <list string="التسويات"
+                  decoration-success="state=='paid'"
+                  decoration-info="state in ('confirmed','waiting_payment')"
+                  decoration-warning="state=='draft'">
+                <field name="name"/>
+                <field name="driver_display"/>
+                <field name="driver_type"/>
+                <field name="month_year"/>
+                <field name="total_revenue"    sum="الإيراد"/>
+                <field name="total_expenses"   sum="المصاريف"/>
+                <field name="total_amana"      sum="العهد"/>
+                <field name="net_to_driver"    sum="صافي السائق"/>
+                <field name="net_to_company"   sum="صافي الشركة"/>
+                <field name="state" widget="badge"
+                       decoration-success="state=='paid'"
+                       decoration-info="state in ('confirmed','waiting_payment')"
+                       decoration-warning="state=='draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sair_settlement" model="ir.actions.act_window">
+        <field name="name">التسويات</field>
+        <field name="res_model">sair.settlement</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

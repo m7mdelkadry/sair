@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sair_office_commission_form" model="ir.ui.view">
+        <field name="name">sair.office.commission.form</field>
+        <field name="model">sair.office.commission</field>
+        <field name="arch" type="xml">
+            <form string="عمولة المكتب">
+                <header>
+                    <button name="action_confirm" string="تأكيد وترحيل قيد الاستحقاق"
+                            type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_draft" string="ترجيع للمسودة"
+                            type="object" class="btn-secondary" invisible="state != 'confirmed'"/>
+                    <button name="action_register_payment" string="تسجيل دفع"
+                            type="object" class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_view_move" string="عرض القيد"
+                            type="object" class="btn-secondary" invisible="not move_id"/>
+                    <button name="action_view_payment" string="عرض سند الدفع"
+                            type="object" class="btn-secondary" invisible="not payment_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_move" type="object" class="oe_stat_button"
+                                icon="fa-book" invisible="not move_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">قيد الاستحقاق</span>
+                            </div>
+                        </button>
+                        <button name="action_view_payment" type="object" class="oe_stat_button"
+                                icon="fa-money" invisible="not payment_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">سند الدفع</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="بيانات العمولة">
+                            <field name="commission_date" readonly="state != 'draft'"/>
+                            <field name="amount" readonly="state != 'draft'"/>
+                            <field name="office_id" readonly="state != 'draft'"/>
+                            <field name="notes" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="المصدر (من الرحلة)">
+                            <field name="trip_id" readonly="1"/>
+                            <field name="vehicle_id" readonly="1"/>
+                            <field name="driver_display" readonly="1"/>
+                            <field name="month_year" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sair_office_commission_list" model="ir.ui.view">
+        <field name="name">sair.office.commission.list</field>
+        <field name="model">sair.office.commission</field>
+        <field name="arch" type="xml">
+            <list string="عمولات المكتب" create="false"
+                  decoration-success="state=='confirmed'"
+                  decoration-info="state=='paid'">
+                <field name="name"/>
+                <field name="commission_date"/>
+                <field name="office_id"/>
+                <field name="driver_display"/>
+                <field name="vehicle_id"/>
+                <field name="month_year"/>
+                <field name="amount" sum="الاجمالي"/>
+                <field name="notes"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sair_office_commission" model="ir.actions.act_window">
+        <field name="name">عمولات المكتب</field>
+        <field name="res_model">sair.office.commission</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+</odoo>

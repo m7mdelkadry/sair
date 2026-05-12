@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════
+         Paper Format — هوامش ضيقة لكل تقارير السير المتصل
+         يُحمَّل هنا (أول ملف) لضمان وجوده قبل أي report
+    ══════════════════════════════════════════════════ -->
+    <record id="paperformat_sair_a4_tight" model="report.paperformat">
+        <field name="name">A4 Tight - السير المتصل</field>
+        <field name="default">False</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line">False</field>
+        <field name="header_spacing">3</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════
+         Sequences
+    ══════════════════════════════════════════════════ -->
+    <data noupdate="1">
+
+        <record id="seq_sair_trip" model="ir.sequence">
+            <field name="name">رحلة - السير المتصل</field>
+            <field name="code">sair.trip</field>
+            <field name="prefix">TRIP/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sair_amana" model="ir.sequence">
+            <field name="name">عهدة - السير المتصل</field>
+            <field name="code">sair.amana</field>
+            <field name="prefix">AMANA/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sair_expense" model="ir.sequence">
+            <field name="name">مصروف - السير المتصل</field>
+            <field name="code">sair.driver.expense</field>
+            <field name="prefix">EXP/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sair_settlement" model="ir.sequence">
+            <field name="name">تسوية - السير المتصل</field>
+            <field name="code">sair.settlement</field>
+            <field name="prefix">SET/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_sair_office_commission" model="ir.sequence">
+            <field name="name">عمولة مكتب - السير المتصل</field>
+            <field name="code">sair.office.commission</field>
+            <field name="prefix">OC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+
+    <data noupdate="0">
+        <record id="journal_sair_operating_expenses" model="account.journal">
+            <field name="name">مصروفات التشغيل - سير</field>
+            <field name="code">SEXP</field>
+            <field name="type">general</field>
+        </record>
+        <record id="journal_sair_driver_payables" model="account.journal">
+            <field name="name">مستحقات السائقين - سير</field>
+            <field name="code">SDRV</field>
+            <field name="type">general</field>
+        </record>
+        <record id="journal_sair_office_commissions" model="account.journal">
+            <field name="name">عمولات المكتب - سير</field>
+            <field name="code">SOFC</field>
+            <field name="type">general</field>
+        </record>
+    </data>
+
+</odoo>

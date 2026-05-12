@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ir.actions.report  →  يربط الزر بالـ QWeb template
+    ══════════════════════════════════════════════════════════════════════════ -->
+    <record id="action_report_performance" model="ir.actions.report">
+        <field name="name">تقرير أداء السيارة والسائق</field>
+        <field name="model">sair.performance.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sair_delivery_v19.report_performance_template</field>
+        <field name="report_file">sair_delivery_v19.report_performance_template</field>
+        <field name="binding_model_id" ref="base.model_res_users"/>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         QWeb Template
+    ══════════════════════════════════════════════════════════════════════════ -->
+    <template id="report_performance_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-foreach="vehicles" t-as="v">
+                    <div class="page" style="direction: rtl; font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 11px;">
+
+                        <!-- ── رأس الصفحة ─────────────────────────────────── -->
+                        <div style="background-color:#1F3C4D; color:white; padding:12px 16px; border-radius:4px; margin-bottom:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:16px; font-weight:bold;">كشف أداء السيارة والسائق</div>
+                                    <div style="font-size:12px; margin-top:4px;">
+                                        الفترة: <t t-esc="month_year_label"/> |
+                                        تصفية: <t t-esc="vehicle_filter"/>
+                                    </div>
+                                </div>
+                                <div style="text-align:left; font-size:11px;">
+                                    <div>تاريخ الطباعة: <span t-esc="today"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── بيانات السيارة ──────────────────────────────── -->
+                        <div style="background-color:#EBF4F4; border:1px solid #1F3C4D; border-radius:4px; padding:8px 12px; margin-bottom:12px;">
+                            <strong style="font-size:13px;">
+                                🚗 السيارة:
+                                <t t-esc="v['vehicle'].name if v['vehicle'] else '—'"/>
+                                <t t-if="v['vehicle'] and v['vehicle'].license_plate">
+                                    | لوحة: <t t-esc="v['vehicle'].license_plate"/>
+                                </t>
+                            </strong>
+                        </div>
+
+                        <!-- ── جدول الرحلات ────────────────────────────────── -->
+                        <t t-if="v['trips']">
+                            <p style="font-weight:bold; color:#1F3C4D; margin-bottom:4px;">📋 الرحلات (الإيراد)</p>
+                            <table style="width:100%; border-collapse:collapse; margin-bottom:14px; font-size:10.5px;">
+                                <thead>
+                                    <tr style="background-color:#1F3C4D; color:white;">
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">التاريخ</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">رقم الرحلة</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">السائق</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">العميل</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">البيان</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:center;">الحالة</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:left;">المبلغ (SAR)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="v['trips']" t-as="trip">
+                                        <tr t-attf-style="background-color: #{ '#f9f9f9' if trip_index % 2 == 0 else 'white' }">
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-field="trip.trip_date"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-field="trip.name"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="trip.driver_display or '—'"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="trip.customer_id.name if trip.customer_id else '—'"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="trip.description or '—'"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd; text-align:center;">
+                                                <span t-esc="dict(trip._fields['state'].selection).get(trip.state, trip.state)"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd; text-align:left; font-weight:bold;">
+                                                <span t-field="trip.trip_amount"
+                                                      t-options='{"widget": "monetary", "display_currency": trip.company_id.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background-color:#d4e6e6; font-weight:bold;">
+                                        <td colspan="6" style="padding:5px 8px; border:1px solid #999; text-align:right;">
+                                            إجمالي الإيراد
+                                        </td>
+                                        <td style="padding:5px 8px; border:1px solid #999; text-align:left;">
+                                            <t t-esc="'%.2f' % v['total_revenue']"/> SAR
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p style="color:#888; font-style:italic; margin-bottom:12px;">لا توجد رحلات لهذه السيارة في الفترة المحددة.</p>
+                        </t>
+
+                        <!-- ── جدول المصاريف ───────────────────────────────── -->
+                        <t t-if="v['expenses']">
+                            <p style="font-weight:bold; color:#c0392b; margin-bottom:4px;">📉 المصاريف</p>
+                            <table style="width:100%; border-collapse:collapse; margin-bottom:14px; font-size:10.5px;">
+                                <thead>
+                                    <tr style="background-color:#c0392b; color:white;">
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">التاريخ</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">رقم المصروف</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">السائق</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">نوع المصروف</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:right;">البيان</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:center;">الحالة</th>
+                                        <th style="padding:5px 8px; border:1px solid #999; text-align:left;">المبلغ (SAR)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="v['expenses']" t-as="exp">
+                                        <tr t-attf-style="background-color: #{ '#fff5f5' if exp_index % 2 == 0 else 'white' }">
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-field="exp.expense_date"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-field="exp.name"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="exp.driver_display or '—'"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="expense_type_ar.get(exp.expense_type, exp.expense_type)"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd;">
+                                                <span t-esc="exp.description or '—'"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd; text-align:center;">
+                                                <span t-esc="dict(exp._fields['state'].selection).get(exp.state, exp.state)"/>
+                                            </td>
+                                            <td style="padding:4px 8px; border:1px solid #ddd; text-align:left; font-weight:bold; color:#c0392b;">
+                                                <span t-field="exp.amount"
+                                                      t-options='{"widget": "monetary", "display_currency": exp.company_id.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background-color:#f5c6c6; font-weight:bold;">
+                                        <td colspan="6" style="padding:5px 8px; border:1px solid #999; text-align:right;">
+                                            إجمالي المصاريف
+                                        </td>
+                                        <td style="padding:5px 8px; border:1px solid #999; text-align:left; color:#c0392b;">
+                                            <t t-esc="'%.2f' % v['total_expense']"/> SAR
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <p style="color:#888; font-style:italic; margin-bottom:12px;">لا توجد مصاريف لهذه السيارة في الفترة المحددة.</p>
+                        </t>
+
+                        <!-- ── ملخص السيارة ────────────────────────────────── -->
+                        <div style="display:flex; justify-content:flex-start;">
+                            <table style="border-collapse:collapse; font-size:11px; border:2px solid #1F3C4D; min-width:300px;">
+                                <tr style="background-color:#EBF4F4;">
+                                    <td style="padding:6px 12px; border:1px solid #aaa;"><strong>إجمالي الإيراد</strong></td>
+                                    <td style="padding:6px 12px; border:1px solid #aaa; text-align:left; color:#1F3C4D;">
+                                        <t t-esc="'%.2f' % v['total_revenue']"/> SAR
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 12px; border:1px solid #aaa;"><strong>إجمالي المصاريف</strong></td>
+                                    <td style="padding:6px 12px; border:1px solid #aaa; text-align:left; color:#c0392b;">
+                                        <t t-esc="'%.2f' % v['total_expense']"/> SAR
+                                    </td>
+                                </tr>
+                                <tr t-attf-style="background-color: #{ '#1F3C4D' if v['net'] >= 0 else '#c0392b' }; color:white;">
+                                    <td style="padding:6px 12px; border:1px solid #555;"><strong>الصافي</strong></td>
+                                    <td style="padding:6px 12px; border:1px solid #555; text-align:left; font-weight:bold;">
+                                        <t t-esc="'%.2f' % v['net']"/> SAR
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- ── فاصل بين السيارات (مش في آخر واحدة) ──────────── -->
+                        <t t-if="not v_last">
+                            <div style="border-top:2px dashed #ccc; margin:20px 0;"/>
+                        </t>
+
+                    </div><!-- end page -->
+                </t><!-- end foreach vehicles -->
+
+                <!-- ══════════════════════════════════════════════════════════
+                     صفحة الملخص الإجمالي (بتطبع في آخر صفحة)
+                ══════════════════════════════════════════════════════════════ -->
+                <div class="page" style="direction:rtl; font-family:'DejaVu Sans', Arial, sans-serif; font-size:11px;">
+                    <div style="background-color:#1F3C4D; color:white; padding:12px 16px; border-radius:4px; margin-bottom:16px;">
+                        <div style="font-size:15px; font-weight:bold;">📊 الملخص الإجمالي</div>
+                        <div style="font-size:11px; margin-top:4px;">
+                            <t t-esc="month_year_label"/> | <t t-esc="vehicle_filter"/>
+                        </div>
+                    </div>
+
+                    <!-- جدول ملخص السيارات -->
+                    <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:20px;">
+                        <thead>
+                            <tr style="background-color:#2c3e50; color:white;">
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:right;">السيارة</th>
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:right;">رقم اللوحة</th>
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:center;">عدد الرحلات</th>
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:left;">إجمالي الإيراد</th>
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:left;">إجمالي المصاريف</th>
+                                <th style="padding:6px 10px; border:1px solid #555; text-align:left;">الصافي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="vehicles" t-as="v">
+                                <tr t-attf-style="background-color: #{ '#f9f9f9' if v_index % 2 == 0 else 'white' }">
+                                    <td style="padding:5px 10px; border:1px solid #ddd;">
+                                        <t t-esc="v['vehicle'].name if v['vehicle'] else '—'"/>
+                                    </td>
+                                    <td style="padding:5px 10px; border:1px solid #ddd;">
+                                        <t t-esc="v['vehicle'].license_plate if v['vehicle'] else '—'"/>
+                                    </td>
+                                    <td style="padding:5px 10px; border:1px solid #ddd; text-align:center;">
+                                        <t t-esc="len(v['trips'])"/>
+                                    </td>
+                                    <td style="padding:5px 10px; border:1px solid #ddd; text-align:left;">
+                                        <t t-esc="'%.2f' % v['total_revenue']"/> SAR
+                                    </td>
+                                    <td style="padding:5px 10px; border:1px solid #ddd; text-align:left; color:#c0392b;">
+                                        <t t-esc="'%.2f' % v['total_expense']"/> SAR
+                                    </td>
+                                    <td t-attf-style="padding:5px 10px; border:1px solid #ddd; text-align:left; font-weight:bold; color:#{ 'green' if v['net'] >= 0 else 'red' }">
+                                        <t t-esc="'%.2f' % v['net']"/> SAR
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color:#1F3C4D; color:white; font-weight:bold; font-size:12px;">
+                                <td colspan="3" style="padding:7px 10px; border:1px solid #555; text-align:right;">
+                                    الإجمالي العام
+                                </td>
+                                <td style="padding:7px 10px; border:1px solid #555; text-align:left;">
+                                    <t t-esc="'%.2f' % grand_revenue"/> SAR
+                                </td>
+                                <td style="padding:7px 10px; border:1px solid #555; text-align:left;">
+                                    <t t-esc="'%.2f' % grand_expense"/> SAR
+                                </td>
+                                <td t-attf-style="padding:7px 10px; border:1px solid #555; text-align:left; color:#{ '#90EE90' if grand_net >= 0 else '#FFB6C1' }">
+                                    <t t-esc="'%.2f' % grand_net"/> SAR
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <!-- توقيع / تذييل -->
+                    <div style="margin-top:30px; border-top:1px solid #ccc; padding-top:10px; color:#666; font-size:10px; text-align:center;">
+                        تم إنشاء هذا التقرير بواسطة نظام السير المتصل — Odoo 19
+                    </div>
+                </div>
+
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!--
+    ╔══════════════════════════════════════════════════════════╗
+    ║  sair_menu.xml — يُحمَّل آخر ملف في الـ manifest        ║
+    ║  لضمان وجود كل الـ actions قبل تعريف القوائم             ║
+    ╚══════════════════════════════════════════════════════════╝
+-->
+
+    <!-- ── الجذر ───────────────────────────────────────────── -->
+    <menuitem id="menu_sair_root"
+              name="السير المتصل"
+              sequence="10"/>
+
+    <!-- ── التشغيل ─────────────────────────────────────────── -->
+    <menuitem id="menu_sair_operations"
+              name="التشغيل"
+              parent="sair_delivery_v19.menu_sair_root"
+              sequence="10"/>
+
+    <menuitem id="menu_sair_trip"
+              name="الرحلات اليومية"
+              parent="sair_delivery_v19.menu_sair_operations"
+              action="sair_delivery_v19.action_sair_trip"
+              sequence="10"/>
+
+    <menuitem id="menu_sair_expense"
+              name="المصاريف اليومية"
+              parent="sair_delivery_v19.menu_sair_operations"
+              action="sair_delivery_v19.action_sair_expense"
+              sequence="20"/>
+
+    <menuitem id="menu_sair_fleet"
+              name="الأسطول والسيارات"
+              parent="sair_delivery_v19.menu_sair_operations"
+              action="fleet.fleet_vehicle_action"
+              sequence="30"/>
+
+    <!-- ── المالية ─────────────────────────────────────────── -->
+    <menuitem id="menu_sair_finance"
+              name="المالية"
+              parent="sair_delivery_v19.menu_sair_root"
+              sequence="20"/>
+
+    <menuitem id="menu_sair_amana"
+              name="العهدات"
+              parent="sair_delivery_v19.menu_sair_finance"
+              action="sair_delivery_v19.action_sair_amana"
+              sequence="10"/>
+
+    <menuitem id="menu_sair_settlement"
+              name="التسوية الشهرية للسائق"
+              parent="sair_delivery_v19.menu_sair_finance"
+              action="sair_delivery_v19.action_sair_settlement"
+              sequence="20"/>
+
+    <menuitem id="menu_sair_office_commission"
+              name="عمولات المكتب"
+              parent="sair_delivery_v19.menu_sair_finance"
+              action="sair_delivery_v19.action_sair_office_commission"
+              sequence="25"/>
+
+    <!-- ── التقارير ────────────────────────────────────────── -->
+    <menuitem id="menu_sair_reports"
+              name="التقارير"
+              parent="sair_delivery_v19.menu_sair_root"
+              sequence="30"/>
+
+    <menuitem id="menu_sair_report_customer"
+              name="كشف رحلات عميل"
+              parent="sair_delivery_v19.menu_sair_reports"
+              action="sair_delivery_v19.action_customer_statement_wizard"
+              sequence="10"/>
+
+    <menuitem id="menu_sair_report_performance"
+              name="تقرير أداء السيارة"
+              parent="sair_delivery_v19.menu_sair_reports"
+              action="sair_delivery_v19.action_performance_wizard"
+              sequence="20"/>
+
+    <!-- ── التهيئة ─────────────────────────────────────────── -->
+    <menuitem id="menu_sair_config"
+              name="التهيئة"
+              parent="sair_delivery_v19.menu_sair_root"
+              sequence="40"/>
+
+    <menuitem id="menu_sair_settings"
+              name="الإعدادات"
+              parent="sair_delivery_v19.menu_sair_config"
+              action="sair_delivery_v19.action_sair_settings"
+              sequence="10"/>
+
+</odoo>

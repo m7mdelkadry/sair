@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sair_trip_manager,sair.trip.manager,model_sair_trip,base.group_system,1,1,1,1
+access_sair_trip_user,sair.trip.user,model_sair_trip,base.group_user,1,1,1,0
+access_sair_amana_manager,sair.amana.manager,model_sair_amana,base.group_system,1,1,1,1
+access_sair_amana_user,sair.amana.user,model_sair_amana,base.group_user,1,1,1,0
+access_sair_expense_manager,sair.driver.expense.manager,model_sair_driver_expense,base.group_system,1,1,1,1
+access_sair_expense_user,sair.driver.expense.user,model_sair_driver_expense,base.group_user,1,1,1,0
+access_sair_settlement_manager,sair.settlement.manager,model_sair_settlement,base.group_system,1,1,1,1
+access_sair_settlement_user,sair.settlement.user,model_sair_settlement,base.group_user,1,0,0,0
+access_sair_customer_wizard_user,sair.customer.statement.wizard.user,model_sair_customer_statement_wizard,base.group_user,1,1,1,1
+access_sair_performance_wizard_user,sair.performance.wizard.user,model_sair_performance_wizard,base.group_user,1,1,1,1
+access_sair_office_commission_user,sair.office.commission.user,model_sair_office_commission,base.group_user,1,1,1,1
+access_sair_settings_manager,sair.settings.manager,model_sair_settings,base.group_system,1,1,1,1
+access_sair_settings_user,sair.settings.user,model_sair_settings,base.group_user,1,0,0,0

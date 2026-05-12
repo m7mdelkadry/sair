@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fleet_vehicle_view_form_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- مركز التكلفة — بعد حقل التاجز في header -->
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="analytic_account_id" string="مركز التكلفة"
+                       options="{'no_create': True, 'no_quick_create': True}"/>
+            </xpath>
+
+            <!-- 2. السمارتبوتنات -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- زر مركز التكلفة (الأناليتك) -->
+                <button class="oe_stat_button" type="object"
+                        name="action_view_analytic_account"
+                        icon="fa-pie-chart"
+                        invisible="not analytic_account_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">مركز التكلفة</span>
+                    </div>
+                </button>
+                <!-- زر الرحلات -->
+                <button class="oe_stat_button" type="object"
+                        name="action_view_vehicle_trips"
+                        icon="fa-truck">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="trip_count" widget="integer"/></span>
+                        <span class="o_stat_text">رحلات</span>
+                    </div>
+                </button>
+                <!-- زر الإيراد -->
+                <button class="oe_stat_button" type="object"
+                        icon="fa-money" style="pointer-events: none;">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="total_trips_revenue" widget="integer"/></span>
+                        <span class="o_stat_text">إيراد</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

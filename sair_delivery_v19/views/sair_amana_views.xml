@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sair_amana_form" model="ir.ui.view">
+        <field name="name">sair.amana.form</field>
+        <field name="model">sair.amana</field>
+        <field name="arch" type="xml">
+            <form string="عهدة السائق">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,settled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="بيانات العهدة">
+                            <field name="amana_date"/>
+                            <field name="amount"/>
+                            <field name="vehicle_id"/>
+                            <field name="analytic_account_id" readonly="1"/>
+                            <!-- اختيار الرحلة يسحب بيانات السائق تلقائيًا -->
+                            <field name="trip_id"/>
+                        </group>
+                        <group string="بيانات السائق (تُملأ تلقائيًا من الرحلة)">
+                            <field name="driver_type" readonly="trip_id != False"/>
+                            <field name="partner_id"
+                                   string="السائق"
+                                   required="not trip_id"
+                                   readonly="trip_id != False"/>
+                            <field name="driver_display" readonly="1" invisible="not driver_display"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="ملاحظات..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sair_amana_list" model="ir.ui.view">
+        <field name="name">sair.amana.list</field>
+        <field name="model">sair.amana</field>
+        <field name="arch" type="xml">
+            <list string="العهدات"
+                  decoration-success="state=='settled'"
+                  decoration-warning="state=='pending'">
+                <field name="name"/>
+                <field name="amana_date"/>
+                <field name="driver_display"/>
+                <field name="driver_type"/>
+                <field name="vehicle_id"/>
+                <field name="amount" sum="إجمالي العهدة"/>
+                <field name="trip_id"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state=='pending'"
+                       decoration-success="state=='settled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sair_amana" model="ir.actions.act_window">
+        <field name="name">العهدات</field>
+        <field name="res_model">sair.amana</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

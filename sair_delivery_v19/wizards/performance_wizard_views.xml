@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Form View للـ Wizard ──────────────────────────────────────────── -->
+    <record id="view_performance_wizard_form" model="ir.ui.view">
+        <field name="name">sair.performance.wizard.form</field>
+        <field name="model">sair.performance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="تقرير أداء السيارة والسائق">
+                <group>
+                    <group string="الفترة الزمنية">
+                        <field name="month"/>
+                        <field name="year"/>
+                    </group>
+                    <group string="تصفية (اختياري)">
+                        <field name="vehicle_id"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print_report"
+                            string="🖨️ طباعة التقرير"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="إلغاء" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Action لفتح الـ Wizard ──────────────────────────────────────── -->
+    <record id="action_performance_wizard" model="ir.actions.act_window">
+        <field name="name">تقرير أداء السيارة</field>
+        <field name="res_model">sair.performance.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

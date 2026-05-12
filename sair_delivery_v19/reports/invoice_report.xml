@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- ══════════════════════════════════════════════════════════════
+     فاتورة ضريبية — السير المتصل v2.0 (Financial Fixes Only)
+══════════════════════════════════════════════════════════════════ -->
+
+<record id="action_report_sair_invoice" model="ir.actions.report">
+    <field name="name">فاتورة ضريبية - السير المتصل</field>
+    <field name="model">account.move</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">sair_delivery_v19.report_sair_tax_invoice</field>
+    <field name="report_file">sair_delivery_v19.report_sair_tax_invoice</field>
+    <field name="binding_model_id" ref="account.model_account_move"/>
+    <field name="binding_type">report</field>
+    <field name="paperformat_id" ref="sair_delivery_v19.paperformat_sair_a4_tight"/>
+</record>
+
+<template id="report_sair_tax_invoice">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.basic_layout">
+                <t t-set="o" t-value="o"/>
+
+                <div class="page" style="
+                    font-family: 'DejaVu Sans', Arial, sans-serif;
+                    font-size: 9.5px;
+                    color: #111;
+                    direction: rtl;
+                    unicode-bidi: embed;
+                    padding: 0;
+                    margin: 0;
+                ">
+
+                <!-- ██ HEADER PROFESSIONAL █████████████████████████ -->
+                <table style="width:100%; border-collapse:collapse; margin-bottom:8px; table-layout:fixed; border-bottom:2px solid #1F3C4D;">
+                    <colgroup><col style="width:38%;"/><col style="width:24%;"/><col style="width:38%;"/></colgroup>
+                    <tr>
+                        <!-- ▌ Arabic ▐ -->
+                        <td style="vertical-align:top; direction:rtl; text-align:right; padding:6px 8px; unicode-bidi:embed;">
+                            <div style="font-size:13px; font-weight:bold; color:#1F3C4D; margin-bottom:4px; line-height:1.3;">شركة السير المتصل للخدمات اللوجستية</div>
+                            <div style="font-size:10px; color:#333; line-height:1.7;">
+                                <div><span style="display:inline-block; width:95px; font-weight:bold;">الهاتف</span><span>: 0555364065</span></div>
+                                <div><span style="display:inline-block; width:95px; font-weight:bold;">السجل التجاري</span><span>: 4030580783</span></div>
+                                <div><span style="display:inline-block; width:95px; font-weight:bold;">الرقم الضريبي</span><span>: 312574453900003</span></div>
+                                <div><span style="display:inline-block; width:95px; font-weight:bold;">البريد</span><span>: Info@alseer-logistic.com</span></div>
+                                <div><span style="display:inline-block; width:95px; font-weight:bold;">العنوان</span><span>: جدة - حي الصفا</span></div>
+                            </div>
+                        </td>
+                        <!-- ▌ LOGO ▐ -->
+                        <td style="text-align:center; vertical-align:middle; padding:6px;">
+                            <t t-if="o.company_id.logo_web">
+                                <img t-att-src="image_data_uri(o.company_id.logo_web)" style="max-height:110px; max-width:160px; display:block; margin:auto;"/>
+                            </t>
+                            <t t-else="">
+                                <div style="font-size:14px; font-weight:bold; color:#1F3C4D;">ALSEER<br/>ALMUTASIL</div>
+                            </t>
+                        </td>
+                        <!-- ▌ ENGLISH ▐ -->
+                        <td style="vertical-align:top; direction:ltr; text-align:left; padding:6px 8px;">
+                            <div style="font-size:13px; font-weight:bold; color:#1F3C4D; margin-bottom:4px; line-height:1.3;">ALSEER ALMUTASIL COMPANY</div>
+                            <div style="font-size:10px; color:#333; line-height:1.7;">
+                                <div><b>Mobile:</b> 0555364065</div>
+                                <div><b>C.R:</b> 4030580783</div>
+                                <div><b>VAT NO:</b> 312574453900003</div>
+                                <div><b>Email:</b> Info@alseer-logistic.com</div>
+                                <div><b>Address:</b> Jeddah - Hay Al Safa</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- ▌ Invoice Title ▐ -->
+                <div style="background: #1F3C4D; color: #fff; font-weight: bold; font-size: 12px; text-align: center; padding: 5px; margin-bottom: 4px; direction: rtl;">فاتورة ضريبية | Tax Invoice</div>
+
+                <!-- ╔══════════════════════════════════════════╗
+                     ║  Invoice Info Row + QR Code             ║
+                     ╚══════════════════════════════════════════╝ -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; border: 1px solid #bbb;">
+                    <colgroup><col style="width:76%;"/><col style="width:24%;"/></colgroup>
+                    <tr>
+                        <td style="padding: 0; vertical-align: top; border-left: 1px solid #bbb;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; width:15%; direction:rtl;">اسم الفرع</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; width:10%;">الإدارة</td>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; width:15%; direction:ltr;">Branch Name</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; width:13%; direction:ltr;">Administration</td>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; width:14%; direction:rtl;">رقم الفاتورة</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; font-weight:bold; color:#1F3C4D; direction:ltr;"><t t-esc="o.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; direction:rtl;">تاريخ الإصدار</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; direction:ltr;"><t t-esc="o.invoice_date"/></td>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; direction:ltr;">Invoice Issue Date</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; direction:ltr;"><t t-esc="o.invoice_date"/></td>
+                                    <td style="background:#EBF4F4; font-weight:bold; padding:3px 5px; border:1px solid #ccc; direction:rtl;">نوع العملة</td>
+                                    <td style="padding:3px 5px; border:1px solid #ccc; direction:rtl;">ريال سعودي</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="text-align: center; vertical-align: middle; padding: 8px 4px; border: 1px solid #ddd;">
+                            <t t-if="o.l10n_sa_qr_code_str">
+                                <img style="width:110px; height:110px; display:block; margin:0 auto; border:2px solid #1F3C4D; padding:4px; background:#fff;"
+                                     alt="ZATCA QR Code"
+                                     t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=150&amp;height=150' % o.l10n_sa_qr_code_str"/>
+                            </t>
+                            <t t-elif="o.zatca_qr_image">
+                                <img t-att-src="image_data_uri(o.zatca_qr_image)"
+                                     style="width:110px; height:110px; display:block; margin:0 auto; border:2px solid #1F3C4D; padding:4px; background:#fff;"/>
+                            </t>
+                            <t t-else="">
+                                <div style="width:110px; height:110px; border:2px dashed #ccc; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:10px; color:#999;">
+                                    QR Code<br/>غير متاح
+                                </div>
+                            </t>
+                            <div style="font-size:8px; color:#1F3C4D; margin-top:6px; font-weight:bold;">ZATCA QR Code</div>
+                        </td>
+                    </tr>
+                </table>
+
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed;">
+                    <colgroup><col style="width:50%;"/><col style="width:50%;"/></colgroup>
+                    <tr>
+                        <th style="background:#1F3C4D; color:#fff; font-weight:bold; text-align:center; padding:3px 6px; border:1px solid #1F3C4D; direction:rtl;">المورد / Seller</th>
+                        <th style="background:#1F3C4D; color:#fff; font-weight:bold; text-align:center; padding:3px 6px; border:1px solid #1F3C4D; direction:rtl;">العميل / Buyer</th>
+                    </tr>
+                    <tr>
+                        <!-- Seller -->
+                        <td style="padding:0; vertical-align:top; border:1px solid #bbb;">
+                            <table style="width:100%; border-collapse:collapse;">
+                                <colgroup><col style="width:44%;"/><col style="width:56%;"/></colgroup>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الاسم</td><td style="padding:2px 5px;border-bottom:1px solid #eee;font-weight:bold;direction:rtl;">شركة السير المتصل</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">رقم المبنى</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:ltr;">5135</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الحي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الصفا</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">المدينة</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">جدة</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">البلد</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">المملكة العربية السعودية</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الرمز البريدي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:ltr;">23455</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الرقم الضريبي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;direction:ltr;">312574453900003</td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;direction:rtl;">معرف آخر</td><td style="padding:2px 5px;direction:ltr;">7041991873</td></tr>
+                            </table>
+                        </td>
+                        <!-- Buyer -->
+                        <td style="padding:0; vertical-align:top; border:1px solid #bbb;">
+                            <table style="width:100%; border-collapse:collapse;">
+                                <colgroup><col style="width:44%;"/><col style="width:56%;"/></colgroup>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الاسم</td><td style="padding:2px 5px;border-bottom:1px solid #eee;font-weight:bold;overflow:hidden;direction:rtl;"><t t-esc="o.partner_id.name"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">رقم المبنى</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.street2 or '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الحي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.street or '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">المدينة</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.city or '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">البلد</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.country_id.name if o.partner_id.country_id else '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الرمز البريدي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.zip or '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;border-bottom:1px solid #eee;direction:rtl;">الرقم الضريبي</td><td style="padding:2px 5px;border-bottom:1px solid #eee;"><t t-esc="o.partner_id.vat or '---'"/></td></tr>
+                                <tr><td style="background:#EBF4F4;font-weight:bold;padding:2px 5px;direction:rtl;">معرف آخر</td><td style="padding:2px 5px;">---</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <t t-set="sair_trip" t-value="o.sair_trip_id"/>
+                <t t-if="sair_trip">
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                        <colgroup><col style="width:20%;"/><col style="width:30%;"/><col style="width:20%;"/><col style="width:30%;"/></colgroup>
+                        <tr>
+                            <th colspan="4" style="background:#0E7C7B; color:#fff; font-weight:bold; text-align:right; padding:3px 8px; border:1px solid #0E7C7B; direction:rtl;">بيانات الرحلة</th>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:3px 5px;border:1px solid #ccc;direction:rtl;">السائق</td>
+                            <td style="padding:3px 5px;border:1px solid #ccc;direction:rtl;"><t t-esc="sair_trip.driver_display or '---'"/></td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:3px 5px;border:1px solid #ccc;direction:rtl;">السيارة</td>
+                            <td style="padding:3px 5px;border:1px solid #ccc;overflow:hidden;direction:rtl;"><t t-esc="sair_trip.vehicle_id.name if sair_trip.vehicle_id else '---'"/></td>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:3px 5px;border:1px solid #ccc;direction:rtl;">رقم اللوحة</td>
+                            <td style="padding:3px 5px;border:1px solid #ccc;direction:ltr;"><t t-esc="sair_trip.vehicle_id.license_plate if sair_trip.vehicle_id else '---'"/></td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:3px 5px;border:1px solid #ccc;direction:rtl;">نوع الرحلة</td>
+                            <td style="padding:3px 5px;border:1px solid #ccc;direction:rtl;">
+                                <t t-if="sair_trip.trip_type == 'trip_jeddah'">ترب - جدة</t>
+                                <t t-elif="sair_trip.trip_type == 'trip_local'">ترب - محلي</t>
+                                <t t-else="">أخرى</t>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+
+                <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                    <colgroup><col style="width:4%;"/><col style="width:10%;"/><col style="width:52%;"/><col style="width:7%;"/><col style="width:13%;"/><col style="width:14%;"/></colgroup>
+                    <thead>
+                        <tr style="background:#1F3C4D; color:#fff;">
+                            <th style="text-align:center; padding:3px 4px; border:1px solid #1F3C4D;">م</th>
+                            <th style="text-align:center; padding:3px 4px; border:1px solid #1F3C4D; direction:rtl;">التاريخ</th>
+                            <th style="text-align:right; padding:3px 6px; border:1px solid #1F3C4D; direction:rtl;">Description</th>
+                            <th style="text-align:center; padding:3px 4px; border:1px solid #1F3C4D; direction:rtl;">الكمية</th>
+                            <th style="text-align:center; padding:3px 4px; border:1px solid #1F3C4D; direction:ltr;">السعر SR</th>
+                            <th style="text-align:center; padding:3px 4px; border:1px solid #1F3C4D; direction:ltr;">الإجمالي SR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type not in ('line_section','line_note'))" t-as="line">
+                            <tr t-att-style="'background:#f7f7f7;' if line_index % 2 else 'background:#fff;'">
+                                <td style="text-align:center; padding:3px 4px; border:1px solid #ddd;"><t t-esc="line_index + 1"/></td>
+                                <td style="text-align:center; padding:3px 4px; border:1px solid #ddd; direction:ltr;"><t t-esc="o.invoice_date"/></td>
+                                <td style="text-align:right; padding:3px 6px; border:1px solid #ddd; word-wrap:break-word; direction:rtl; unicode-bidi:embed;"><t t-esc="line.name or (line.product_id.name if line.product_id else '')"/></td>
+                                <td style="text-align:center; padding:3px 4px; border:1px solid #ddd; direction:ltr;"><t t-esc="'%.0f' % line.quantity"/></td>
+                                <td style="text-align:center; padding:3px 4px; border:1px solid #ddd; direction:ltr;"><t t-esc="'%.2f' % line.price_unit"/></td>
+                                <td style="text-align:center; padding:3px 4px; border:1px solid #ddd; direction:ltr; font-weight:bold;"><t t-esc="'%.2f' % line.price_subtotal"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+
+                <div style="direction:ltr; unicode-bidi:embed; text-align:left; margin-bottom:4px;">
+                    <table style="width: 44%; float: left; border-collapse: collapse; border: 1px solid #bbb;">
+                        <tr>
+                            <td style="background:#f0f0f0;font-weight:bold;padding:3px 8px;border-bottom:1px solid #bbb;text-align:left;white-space:nowrap;">الإجمالي / Total</td>
+                            <td style="text-align:center;font-weight:bold;padding:3px 8px;border-bottom:1px solid #bbb;white-space:nowrap;"><t t-esc="'%.2f' % o.amount_untaxed"/></td>
+                        </tr>
+                        <tr>
+                            <td style="background:#f0f0f0;font-weight:bold;padding:3px 8px;border-bottom:1px solid #bbb;text-align:left;white-space:nowrap;">الخصم / Total Discount</td>
+                            <td style="text-align:center;padding:3px 8px;border-bottom:1px solid #bbb;">
+                                <t t-esc="'%.2f' % (o.amount_untaxed - (o.amount_total - o.amount_tax))"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background:#f0f0f0;font-weight:bold;padding:3px 8px;border-bottom:1px solid #bbb;text-align:left;color:#854F0B;white-space:nowrap;">ضريبة القيمة المضافة / Vat Total</td>
+                            <td style="text-align:center;font-weight:bold;padding:3px 8px;border-bottom:1px solid #bbb;color:#854F0B;"><t t-esc="'%.2f' % o.amount_tax"/></td>
+                        </tr>
+                        <tr style="background:#1F3C4D; color:#fff;">
+                            <td style="font-weight:bold;padding:4px 8px;font-size:8.5px;text-align:left;white-space:nowrap;">إجمالي المبلغ المستحق / Due Amount Total</td>
+                            <td style="text-align:center;font-weight:bold;padding:4px 8px;font-size:11px;"><t t-esc="'%.2f' % o.amount_total"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="clear:both;"/>
+
+                <table style="width:100%; border-collapse:collapse; margin:5px 0; border:1px solid #bbb;">
+                    <tr>
+                        <td style="padding: 6px 10px; background: #EBF4F4; border-right: 3px solid #1F3C4D; direction: rtl; unicode-bidi: embed; text-align: right;">
+                            <t t-try="">
+                                <span style="font-size:9px; font-weight:bold; color:#1F3C4D;">:<t t-esc="o.currency_id.amount_to_text(o.amount_total)"/></span>
+                            </t>
+                            <t t-except="">
+                                <span style="color: #1F3C4D; font-weight: bold; font-size: 12px; margin: 0 6px; direction: ltr; display: inline-block;"><t t-esc="'%.2f' % o.amount_total"/></span>
+                                <span style="font-size:8px; font-weight:bold; color:#1F3C4D;">المبلغ كامل بالريال السعودي فقط لا غير</span>
+                            </t>
+                        </td>
+                    </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; margin-top: 16px; border: 1px solid #bbb; table-layout: fixed;">
+                    <colgroup><col style="width:50%;"/><col style="width:50%;"/></colgroup>
+                    <tr>
+                        <td style="text-align:center; padding:6px; border-left:1px solid #bbb;">
+                            <div style="border-top:1px solid #1F3C4D; margin-top:28px; padding-top:4px; font-weight:bold; font-size:8.5px; direction:rtl;">اسم البائع / Seller Name</div>
+                        </td>
+                        <td style="text-align:center; padding:6px;">
+                            <div style="border-top:1px solid #1F3C4D; margin-top:28px; padding-top:4px; font-weight:bold; font-size:8.5px; direction:rtl;">اسم المستلم / Receiver Name</div>
+                        </td>
+                    </tr>
+                </table>
+
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+<!-- ══════════════════════════════════════════════════════════════
+     بوليصة الرحلة (مع إخفاء العمولات للسائق)
+══════════════════════════════════════════════════════════════════ -->
+<record id="action_report_sair_waybill" model="ir.actions.report">
+    <field name="name">بوليصة الرحلة</field>
+    <field name="model">sair.trip</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">sair_delivery_v19.report_sair_waybill</field>
+    <field name="report_file">sair_delivery_v19.report_sair_waybill</field>
+    <field name="binding_model_id" ref="model_sair_trip"/>
+    <field name="binding_type">report</field>
+    <field name="paperformat_id" ref="sair_delivery_v19.paperformat_sair_a4_tight"/>
+</record>
+
+<template id="report_sair_waybill">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="web.basic_layout">
+                <t t-set="doc" t-value="doc"/>
+                <!-- ✅ حدد نوع البوليصة من الـ context -->
+                <t t-set="report_type" t-value="context.get('report_type', 'company')"/>
+
+                <div class="page" style="font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10px; color: #111; direction: rtl; unicode-bidi: embed; padding: 0; margin: 0;">
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                        <colgroup><col style="width:55%;"/><col style="width:45%;"/></colgroup>
+                        <tr>
+                            <td style="vertical-align:middle; padding:0 4px 0 0; direction:rtl;">
+                                <t t-if="doc.company_id.logo_web">
+                                    <img t-att-src="image_data_uri(doc.company_id.logo_web)"
+                                         style="max-height:40px; max-width:65px; vertical-align:middle; margin-left:5px;"/>
+                                </t>
+                                <span style="font-size:12px; font-weight:bold; color:#1F3C4D; vertical-align:middle;">
+                                    شركة السير المتصل للخدمات اللوجستية
+                                </span>
+                                <div style="font-size:8px; color:#555; margin-top:2px; direction:ltr;">
+                                    ALSEER ALMUTASIL | VAT: 312574453900003 | C.R: 4030580783
+                                </div>
+                            </td>
+                            <td style="padding:0 0 0 4px; vertical-align:middle;">
+                                <table style="border:2px solid #1F3C4D; width:100%; border-collapse:collapse;">
+                                    <tr>
+                                        <td style="background:#1F3C4D; color:#fff; text-align:center; width:55%;
+                                                   padding:5px; font-size:11px; font-weight:bold; direction:rtl;">
+                                            بوليصة الرحلة<br/>
+                                            <span style="font-size:8.5px; font-weight:normal; direction:ltr;">Trip Waybill</span>
+                                        </td>
+                                        <td style="padding:5px; text-align:center; vertical-align:middle;">
+                                            <div style="font-size:7.5px; color:#555;">رقم البوليصة</div>
+                                            <div style="font-size:13px; font-weight:bold; color:#1F3C4D; direction:ltr;"><t t-esc="doc.name"/></div>
+                                            <div style="font-size:8.5px; color:#555; direction:ltr;"><t t-esc="doc.trip_date"/></div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    <div style="border-top:2px solid #1F3C4D; margin:3px 0;"/>
+
+                    <!-- تفاصيل الرحلة -->
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                        <colgroup><col style="width:20%;"/><col style="width:30%;"/><col style="width:20%;"/><col style="width:30%;"/></colgroup>
+                        <tr>
+                            <th colspan="4" style="background:#1F3C4D;color:#fff;font-weight:bold;text-align:right;
+                                                   padding:4px 8px;border:1px solid #1F3C4D;direction:rtl;">تفاصيل الرحلة</th>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">رقم الرحلة</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;font-weight:bold;color:#1F3C4D;direction:ltr;"><t t-esc="doc.name"/></td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">التاريخ</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="doc.trip_date"/></td>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">نوع الرحلة</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;direction:rtl;">
+                                <t t-if="doc.trip_type == 'trip_jeddah'">ترب - جدة</t>
+                                <t t-elif="doc.trip_type == 'trip_local'">ترب - محلي</t>
+                                <t t-else="">أخرى</t>
+                            </td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">قيمة الرحلة</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;font-weight:bold;color:#0E7C7B;direction:ltr;">
+                                <t t-esc="'%.2f SAR' % doc.trip_amount"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">العميل</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;overflow:hidden;direction:rtl;">
+                                <t t-esc="doc.customer_id.name if doc.customer_id else '---'"/>
+                            </td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">ملاحظات</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;overflow:hidden;word-wrap:break-word;direction:rtl;">
+                                <t t-esc="doc.description or '---'"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- السائق والسيارة -->
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                        <colgroup><col style="width:20%;"/><col style="width:30%;"/><col style="width:20%;"/><col style="width:30%;"/></colgroup>
+                        <tr>
+                            <th colspan="4" style="background:#0E7C7B;color:#fff;font-weight:bold;text-align:right;
+                                                   padding:4px 8px;border:1px solid #0E7C7B;direction:rtl;">السائق والسيارة</th>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">اسم السائق</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;overflow:hidden;direction:rtl;"><t t-esc="doc.driver_display or '---'"/></td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">نوع السائق</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;direction:rtl;">
+                                <t t-if="doc.driver_type == 'internal'">سائق داخلي</t>
+                                <t t-elif="doc.driver_type == 'external'">سائق خارجي (50/50)</t>
+                                <t t-elif="doc.driver_type == 'commission'">سائق بالعمولة</t>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">السيارة</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;overflow:hidden;direction:rtl;">
+                                <t t-esc="doc.vehicle_id.name if doc.vehicle_id else '---'"/>
+                            </td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">رقم اللوحة</td>
+                            <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;">
+                                <t t-esc="doc.vehicle_id.license_plate if doc.vehicle_id else '---'"/>
+                            </td>
+                        </tr>
+
+                        <!-- ✅ اخفاء العمولات للسائق فقط -->
+                        <t t-if="report_type == 'company'">
+                            <t t-if="doc.driver_type == 'external'">
+                                <tr>
+                                    <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">حصة السائق (50%)</td>
+                                    <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="'%.2f SAR' % doc.driver_share"/></td>
+                                    <td style="background:#EBF4F4;font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">حصة الشركة (50%)</td>
+                                    <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="'%.2f SAR' % doc.company_share"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="doc.driver_type == 'commission'">
+                                <tr style="background:#FFF9C4;">
+                                    <td style="font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">عمولة الشركة</td>
+                                    <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="'%.2f SAR' % doc.company_commission"/></td>
+                                    <td style="font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">عمولة المكتب</td>
+                                    <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="'%.2f SAR' % doc.office_commission"/></td>
+                                </tr>
+                                <tr style="background:#FFF9C4;">
+                                    <td style="font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">عمولة السائق</td>
+                                    <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="'%.2f SAR' % doc.driver_commission"/></td>
+                                    <td colspan="2" style="border:1px solid #ccc;"/>
+                                </tr>
+                            </t>
+                        </t>
+                    </table>
+
+                    <!-- العهدة -->
+                    <t t-if="doc.amana_id">
+                        <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed;">
+                            <colgroup><col style="width:20%;"/><col style="width:30%;"/><col style="width:20%;"/><col style="width:30%;"/></colgroup>
+                            <tr>
+                                <th colspan="4" style="background:#854F0B;color:#fff;font-weight:bold;text-align:right;
+                                                       padding:4px 8px;border:1px solid #854F0B;direction:rtl;">العهدة — كاش محصل</th>
+                            </tr>
+                            <tr style="background:#FFF3E0;">
+                                <td style="font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">رقم العهدة</td>
+                                <td style="padding:4px 6px;border:1px solid #ccc;direction:ltr;"><t t-esc="doc.amana_id.name"/></td>
+                                <td style="font-weight:bold;padding:4px 6px;border:1px solid #ccc;direction:rtl;">المبلغ</td>
+                                <td style="padding:4px 6px;border:1px solid #ccc;font-weight:bold;color:#854F0B;direction:ltr;">
+                                    <t t-esc="'%.2f SAR' % doc.amana_id.amount"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+
+                    <!-- التواقيع -->
+                    <table style="width:100%; border-collapse:collapse; margin-top:20px; border:1px solid #bbb; table-layout:fixed;">
+                        <colgroup><col style="width:33%;"/><col style="width:33%;"/><col style="width:33%;"/></colgroup>
+                        <tr>
+                            <td style="text-align:center; border-left:1px solid #ccc; padding:6px;">
+                                <div style="border-top:1px solid #1F3C4D; margin-top:35px; padding-top:4px; font-weight:bold; font-size:8.5px; direction:rtl;">
+                                    توقيع وبصمة السائق<br/>
+                                    <span style="color:#777; font-weight:normal; direction:ltr;">Driver Signature &amp; Fingerprint</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center; border-left:1px solid #ccc; padding:6px;">
+                                <div style="border-top:1px solid #1F3C4D; margin-top:35px; padding-top:4px; font-weight:bold; font-size:8.5px; direction:rtl;">
+                                    اسم المستلم والتوقيع<br/>
+                                    <span style="color:#777; font-weight:normal; direction:ltr;">Receiver Name &amp; Signature</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center; padding:6px;">
+                                <div style="border-top:1px solid #1F3C4D; margin-top:35px; padding-top:4px; font-weight:bold; font-size:8.5px; direction:rtl;">
+                                    توقيع وختم الشركة<br/>
+                                    <span style="color:#777; font-weight:normal; direction:ltr;">Company Stamp &amp; Signature</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+
+<!-- ══════════════════════════════════════════════════════════════
+     كشف رحلات عميل (مع إخفاء العمولات للعميل)
+══════════════════════════════════════════════════════════════════ -->
+<record id="action_report_customer_statement" model="ir.actions.report">
+    <field name="name">كشف رحلات عميل</field>
+    <field name="model">sair.customer.statement.wizard</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">sair_delivery_v19.report_customer_statement</field>
+    <field name="report_file">sair_delivery_v19.report_customer_statement</field>
+    <field name="paperformat_id" ref="sair_delivery_v19.paperformat_sair_a4_tight"/>
+</record>
+
+<template id="report_customer_statement">
+    <t t-call="web.html_container">
+        <t t-foreach="statements" t-as="stmt">
+            <t t-call="web.basic_layout">
+                <!-- ✅ حدد نوع الكشف من البيانات -->
+                <t t-set="report_type" t-value="stmt.get('report_type', 'company')"/>
+
+                <div class="page" style="font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10px; color: #111; direction: rtl; unicode-bidi: embed;">
+
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+                        <tr>
+                            <td style="direction:rtl;">
+                                <div style="font-size:14px;font-weight:bold;color:#1F3C4D;">
+                                    شركة السير المتصل للخدمات اللوجستية
+                                </div>
+                                <div style="font-size:9px;color:#555;">
+                                    ALSEER ALMUTASIL | VAT: 312574453900003
+                                </div>
+                            </td>
+
+                            <td style="text-align:center;">
+                                <div style="background:#1F3C4D;color:#fff;padding:10px;">
+                                    <div style="font-size:14px;font-weight:bold;">
+                                        كشف حساب عميل
+                                    </div>
+                                    <div style="font-size:9px;">
+                                        Customer Account Statement
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- بيانات الكشف -->
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:4px; table-layout:fixed; border:1px solid #bbb;">
+                        <colgroup>
+                            <col style="width:10%;"/><col style="width:35%;"/>
+                            <col style="width:8%;"/><col style="width:16%;"/>
+                            <col style="width:8%;"/><col style="width:16%;"/>
+                            <col style="width:7%;"/>
+                        </colgroup>
+                        <tr>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 5px;border:1px solid #ccc;direction:rtl;">العميل</td>
+                            <td style="padding:4px 5px;border:1px solid #ccc;font-weight:bold;color:#1F3C4D;overflow:hidden;direction:rtl;">
+                                <t t-esc="stmt['customer_name']"/>
+                            </td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 5px;border:1px solid #ccc;direction:rtl;">من</td>
+                            <td style="padding:4px 5px;border:1px solid #ccc;direction:ltr;"><t t-esc="stmt['date_from']"/></td>
+                            <td style="background:#EBF4F4;font-weight:bold;padding:4px 5px;border:1px solid #ccc;direction:rtl;">إلى</td>
+                            <td style="padding:4px 5px;border:1px solid #ccc;direction:ltr;"><t t-esc="stmt['date_to']"/></td>
+                            <td style="padding:4px 5px;border:1px solid #ccc;text-align:center;font-size:8px;direction:rtl;">
+                                رحلات: <b><t t-esc="stmt['trip_count']"/></b>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- TABLE -->
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #bbb;">
+                        <!-- ✅ تحديد عرض الأعمدة حسب النوع -->
+                        <t t-if="report_type == 'company'">
+                            <!-- للشركة: كل الأعمدة -->
+                            <colgroup>
+                                <col style="width:4%;"/>
+                                <col style="width:9%;"/>
+                                <col style="width:13%;"/>
+                                <col style="width:10%;"/>
+                                <col style="width:28%;"/>
+                                <col style="width:9%;"/>
+                                <col style="width:9%;"/>
+                                <col style="width:9%;"/>
+                                <col style="width:9%;"/>
+                            </colgroup>
+                        </t>
+                        <t t-else="">
+                            <!-- للعميل: بدون عمولات -->
+                            <colgroup>
+                                <col style="width:5%;"/>
+                                <col style="width:11%;"/>
+                                <col style="width:15%;"/>
+                                <col style="width:13%;"/>
+                                <col style="width:35%;"/>
+                                <col style="width:10%;"/>
+                                <col style="width:11%;"/>
+                            </colgroup>
+                        </t>
+
+                        <thead>
+                            <tr style="background:#1F3C4D;color:#fff;">
+                                <th>م</th>
+                                <th>التاريخ</th>
+                                <th>رقم الرحلة</th>
+                                <th>السائق</th>
+                                <th>ملاحظات</th>
+                                <th>المبلغ</th>
+                                <!-- ✅ اخفاء عمودين العمولة للعميل -->
+                                <t t-if="report_type == 'company'">
+                                    <th>عمولة الشركة</th>
+                                    <th>عمولة المكتب</th>
+                                </t>
+                                <th>الرصيد</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <t t-foreach="stmt['lines']" t-as="line">
+                                <tr>
+                                    <td style="border:1px solid #ddd;text-align:center;padding:4px;">
+                                        <t t-esc="line_index+1"/>
+                                    </td>
+
+                                    <td style="border:1px solid #ddd;text-align:center;padding:4px;direction:ltr;">
+                                        <t t-esc="line['date']"/>
+                                    </td>
+
+                                    <td style="border:1px solid #ddd;text-align:center;padding:4px;font-weight:bold;">
+                                        <t t-esc="line['trip_name']"/>
+                                    </td>
+
+                                    <td style="border:1px solid #ddd;padding:4px;direction:rtl;">
+                                        <t t-esc="line['driver']"/>
+                                    </td>
+
+                                    <td style="
+                                        border:1px solid #ddd;
+                                        padding:6px;
+                                        direction:rtl;
+                                        unicode-bidi:embed;
+                                        white-space:normal;
+                                        word-break:break-word;
+                                        overflow-wrap:break-word;
+                                        font-size:11px;
+                                        color:#222;
+                                        line-height:1.5;
+                                    ">
+                                        <t t-if="line['notes']">
+                                            <div style="background:#f5f5f5;padding:4px;border-radius:3px;">
+                                                <t t-esc="line['notes']"/>
+                                            </div>
+                                        </t>
+                                    </td>
+
+                                    <td style="border:1px solid #ddd;text-align:center;padding:4px;direction:ltr;">
+                                        <t t-esc="'%.2f' % line['debit']"/>
+                                    </td>
+
+                                    <!-- ✅ اخفاء العمولات للعميل -->
+                                    <t t-if="report_type == 'company'">
+                                        <td style="border:1px solid #ddd;text-align:center;padding:4px;direction:ltr;">
+                                            <t t-esc="'%.2f' % line['comm_co'] if line['comm_co'] else '---'"/>
+                                        </td>
+
+                                        <td style="border:1px solid #ddd;text-align:center;padding:4px;direction:ltr;">
+                                            <t t-esc="'%.2f' % line['comm_off'] if line['comm_off'] else '---'"/>
+                                        </td>
+                                    </t>
+
+                                    <td style="border:1px solid #ddd;text-align:center;padding:4px;font-weight:bold;">
+                                        <t t-esc="'%.2f' % line['balance']"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- TOTAL -->
+                    <table style="width:40%; margin-top:10px; border:1px solid #bbb;">
+                        <tr style="background:#1F3C4D;color:#fff;">
+                            <th colspan="2">الإجمالي</th>
+                        </tr>
+
+                        <tr>
+                            <td>إجمالي الرحلات</td>
+                            <td style="text-align:center;">
+                                <t t-esc="'%.2f' % stmt['total_debit']"/> SAR
+                            </td>
+                        </tr>
+
+                        <tr style="background:#1F3C4D;color:#fff;">
+                            <td>الرصيد</td>
+                            <td style="text-align:center;">
+                                <t t-esc="'%.2f' % stmt['total_balance']"/> SAR
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+</odoo>

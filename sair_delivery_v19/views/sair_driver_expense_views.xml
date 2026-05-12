@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sair_expense_form" model="ir.ui.view">
+        <field name="name">sair.driver.expense.form</field>
+        <field name="model">sair.driver.expense</field>
+        <field name="arch" type="xml">
+            <form string="مصروف يومي">
+                <header>
+                    <button name="action_confirm"
+                            string="تأكيد وتسميع محاسبي"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel_to_draft"
+                            string="إلغاء التأكيد"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'confirmed'"
+                            confirm="هل تريد إلغاء تأكيد هذا المصروف وارجاعه لمسودة؟"/>
+                    <button name="action_view_move"
+                            string="عرض القيد المحاسبي"
+                            type="object" class="btn-secondary"
+                            invisible="not move_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,settled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="بيانات المصروف">
+                            <field name="expense_date"/>
+                            <field name="expense_type"/>
+                            <field name="amount"/>
+                            <field name="trip_id"/>
+                            <field name="description"/>
+                            <field name="vehicle_id"/>
+                            <field name="analytic_account_id" readonly="1"
+                                   help="مركز التكلفة يُسحب تلقائيًا من السيارة"/>
+                        </group>
+                        <group string="بيانات السائق">
+                            <field name="driver_type"/>
+                            <field name="partner_id" string="السائق" required="1"/>
+                            <field name="driver_display" readonly="1" invisible="not driver_display"/>
+                        </group>
+                    </group>
+
+                    <!-- ── إعدادات الحساب المحاسبي ───────────────────────── -->
+                    <group string="الإعداد المحاسبي">
+                        <group>
+                            <field name="expense_account_id"
+                                   domain="[('account_type', '=', 'expense')]"
+                                   readonly="state != 'draft'"
+                                   help="حساب المدين في القيد"/>
+                        </group>
+                        <group>
+                            <field name="move_id" readonly="1" invisible="not move_id"/>
+                        </group>
+                    </group>
+
+                    <!-- ── توزيع المصروف (نفس فكرة العمولات في الرحلة) ──────── -->
+                    <group string="توزيع المصروف"
+                           invisible="driver_type == 'internal'">
+                        <group>
+                            <field name="driver_expense_share" readonly="state != 'draft'"/>
+                            <field name="company_expense_share" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="remaining_expense" readonly="1"
+                                   string="المتبقي من المصروف"/>
+                            <div invisible="remaining_expense != 0"
+                                 style="color: #27ae60; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                التوزيع مكتمل — يمكنك التأكيد
+                            </div>
+                            <div invisible="remaining_expense == 0"
+                                 style="color: #c0392b; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                المتبقي غير صفري — لن يمكنك التأكيد حتى يصل صفر
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sair_expense_list" model="ir.ui.view">
+        <field name="name">sair.driver.expense.list</field>
+        <field name="model">sair.driver.expense</field>
+        <field name="arch" type="xml">
+            <list string="المصاريف"
+                  decoration-success="state=='confirmed'"
+                  decoration-muted="state=='settled'">
+                <field name="name"/>
+                <field name="expense_date"/>
+                <field name="driver_display"/>
+                <field name="driver_type"/>
+                <field name="vehicle_id"/>
+                <field name="expense_type"/>
+                <field name="amount"               sum="إجمالي المصاريف"/>
+                <field name="company_expense_share" sum="على الشركة"/>
+                <field name="move_id"              optional="show" string="قيد محاسبي"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-info="state == 'settled'"
+                       decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sair_expense" model="ir.actions.act_window">
+        <field name="name">المصاريف اليومية</field>
+        <field name="res_model">sair.driver.expense</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sair_trip_form" model="ir.ui.view">
+        <field name="name">sair.trip.form</field>
+        <field name="model">sair.trip</field>
+        <field name="arch" type="xml">
+            <form string="رحلة يومية">
+                <header>
+                    <button name="action_confirm"
+                            string="تأكيد الرحلة"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_create_invoice"
+                            string="إنشاء فاتورة"
+                            type="object" class="btn-primary"
+                            invisible="state != 'confirmed' or has_invoice"/>
+                    <button name="action_view_invoice"
+                            string="عرض الفاتورة"
+                            type="object" class="btn-secondary"
+                            invisible="not has_invoice"/>
+                    <button name="action_reset_draft"
+                            string="ارجاع لمسودة"
+                            type="object"
+                            invisible="state not in ['confirmed']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,settled"/>
+                </header>
+                <sheet>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         السمارتبوتنات
+                    ══════════════════════════════════════════════════════ -->
+                    <div class="oe_button_box" name="button_box">
+
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_invoice"
+                                icon="fa-file-text-o"
+                                invisible="not has_invoice">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">فاتورة</span>
+                            </div>
+                        </button>
+
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_trip_expenses"
+                                icon="fa-file-text-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="expense_count" widget="integer"/></span>
+                                <span class="o_stat_text">مصروفات</span>
+                            </div>
+                        </button>
+
+                        <button class="oe_stat_button" type="object"
+                                icon="fa-money" style="pointer-events: none;">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="trip_net" widget="integer"/></span>
+                                <span class="o_stat_text">صافي ربح الشركة</span>
+                            </div>
+                        </button>
+
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="بيانات الرحلة">
+                            <field name="trip_date"/>
+                            <field name="trip_type"/>
+                            <field name="trip_amount"/>
+                            <field name="description"/>
+                            <field name="vehicle_id"/>
+                            <field name="analytic_account_id" readonly="1"/>
+                        </group>
+                        <group string="بيانات الأطراف">
+                            <field name="customer_id"/>
+                            <field name="driver_type"/>
+                            <field name="partner_id"
+                                   string="السائق"
+                                   required="1"/>
+                            <field name="cash_collected"/>
+                            <field name="amana_id" readonly="1"
+                                   invisible="not amana_id"/>
+                        </group>
+                    </group>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         توزيع العمولات (سائق بالعمولة فقط)
+                    ══════════════════════════════════════════════════════ -->
+                    <group string="تفاصيل العمولة"
+                           invisible="driver_type != 'commission'">
+                        <group>
+                            <field name="company_commission"/>
+                            <field name="office_commission"/>
+                            <field name="driver_commission"/>
+                        </group>
+                        <group>
+                            <!-- المتبقي: لازم يكون صفر عشان نأكد الرحلة -->
+                            <field name="remaining_for_commissions" readonly="1"
+                                   string="المتبقي من قيمة الرحلة"/>
+                            <div invisible="remaining_for_commissions != 0"
+                                 style="color: #27ae60; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                التوزيع مكتمل — يمكنك التأكيد
+                            </div>
+                            <div invisible="remaining_for_commissions == 0"
+                                 style="color: #c0392b; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                المتبقي غير صفري — لن يمكنك التأكيد حتى يصل صفر
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         الحصص (50/50 خارجي)
+                    ══════════════════════════════════════════════════════ -->
+                    <group string="الحصص (50/50)"
+                           invisible="driver_type != 'external'">
+                        <group>
+                            <field name="driver_share"  readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_share" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="الفاتورة" invisible="not has_invoice">
+                        <field name="invoice_id" readonly="1"/>
+                    </group>
+                    <group string="التسوية" invisible="not settlement_id">
+                        <field name="settlement_id" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sair_trip_list" model="ir.ui.view">
+        <field name="name">sair.trip.list</field>
+        <field name="model">sair.trip</field>
+        <field name="arch" type="xml">
+            <list string="الرحلات"
+                  decoration-success="state=='confirmed'"
+                  decoration-muted="state=='settled'"
+                  decoration-warning="state=='draft'">
+                <field name="name"/>
+                <field name="trip_date"/>
+                <field name="customer_id"/>
+                <field name="driver_display"/>
+                <field name="driver_type"/>
+                <field name="vehicle_id"/>
+                <field name="trip_amount"    sum="إجمالي الإيراد"/>
+                <field name="driver_share"   sum="إجمالي حصة السائق"/>
+                <field name="cash_collected" widget="boolean_toggle"/>
+                <field name="has_invoice"    widget="boolean_toggle" readonly="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state=='confirmed'"
+                       decoration-warning="state=='draft'"
+                       decoration-muted="state=='settled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sair_trip_search" model="ir.ui.view">
+        <field name="name">sair.trip.search</field>
+        <field name="model">sair.trip</field>
+        <field name="arch" type="xml">
+            <search string="بحث في الرحلات">
+                <field name="name"/>
+                <field name="driver_display"/>
+                <field name="vehicle_id"/>
+                <field name="customer_id"/>
+                <filter string="مسودة"        name="draft"       domain="[('state','=','draft')]"/>
+                <filter string="مؤكدة"        name="confirmed"   domain="[('state','=','confirmed')]"/>
+                <filter string="مسواة"        name="settled"     domain="[('state','=','settled')]"/>
+                <filter string="بفاتورة"      name="invoiced"    domain="[('has_invoice','=',True)]"/>
+                <filter string="بدون فاتورة"  name="no_invoice"  domain="[('has_invoice','=',False),('state','=','confirmed')]"/>
+                <filter string="كاش"          name="cash"        domain="[('cash_collected','=',True)]"/>
+                <filter string="موظف"         name="internal"    domain="[('driver_type','=','internal')]"/>
+                <filter string="خارجي 50/50"  name="external"    domain="[('driver_type','=','external')]"/>
+                <filter string="بالعمولة"     name="commission"  domain="[('driver_type','=','commission')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sair_trip" model="ir.actions.act_window">
+        <field name="name">الرحلات اليومية</field>
+        <field name="res_model">sair.trip</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sair_trip_search"/>
+        <field name="context">{'search_default_confirmed': 1}</field>
+    </record>
+
+
+    <!-- ══ حقول السير المتصل على شاشة الفاتورة ══ -->
+    <record id="view_account_move_sair_inherit" model="ir.ui.view">
+        <field name="name">account.move.sair.trip.info</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sair_trip_id"
+                       string="رقم الرحلة"
+                       readonly="1"
+                       invisible="not sair_trip_id"
+                       widget="many2one_avatar"/>
+                <field name="sair_driver_display"
+                       string="السائق"
+                       readonly="1"
+                       invisible="not sair_trip_id"/>
+                <field name="sair_vehicle_display"
+                       string="السيارة | رقم اللوحة"
+                       readonly="1"
+                       invisible="not sair_trip_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

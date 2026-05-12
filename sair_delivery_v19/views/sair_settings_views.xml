@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_sair_settings_form" model="ir.ui.view">
+        <field name="name">sair.settings.form</field>
+        <field name="model">sair.settings</field>
+        <field name="arch" type="xml">
+            <form string="إعدادات السير المتصل">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>إعدادات السير المتصل</h1>
+                        <p class="text-muted">حدد اليوميات والحسابات المحاسبية لكل عملية في النظام</p>
+                    </div>
+
+                    <group>
+                        <field name="company_id" readonly="id != False"/>
+                    </group>
+
+                    <notebook>
+
+                        <!-- مصاريف التشغيل -->
+                        <page string="مصاريف التشغيل">
+                            <group string="يومية وحسابات المصاريف اليومية (وقود، صيانة، رسوم...)">
+                                <group>
+                                    <field name="operating_expense_journal_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="operating_expense_account_id"
+                                           options="{'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="expense_payable_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب ذمم دائنة مصاريف (دائن عند التأكيد)"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- تسوية سائق خارجي / عمولة -->
+                        <page string="سائق خارجي / عمولة">
+                            <group string="تسوية السائق الخارجي والسائق بالعمولة">
+                                <group>
+                                    <field name="settlement_journal_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="commission_expense_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مصروف عمولة السائق (مدين)"/>
+                                </group>
+                                <group>
+                                    <field name="driver_payable_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مستحقات السائق (دائن)"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- سائق موظف -->
+                        <page string="سائق موظف">
+                            <group string="تسوية السائق الموظف">
+                                <group>
+                                    <field name="internal_settlement_journal_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="internal_driver_expense_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مصاريف سائق موظف (مدين)"/>
+                                </group>
+                                <group>
+                                    <field name="internal_driver_payable_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مستحقات سائق موظف (دائن - يُدفع كمورد)"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                <strong>ملاحظة:</strong>
+                                المصروف اليومي للسائق الموظف يُخصم من الأناليتك عند تأكيد المصروف فقط.
+                                قيد التسوية لا يُكرر الخصم من الأناليتك.
+                            </div>
+                        </page>
+
+                        <!-- عمولات المكتب -->
+                        <page string="عمولات المكتب">
+                            <group string="يومية وحسابات عمولات المكتب">
+                                <group>
+                                    <field name="office_commission_journal_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="office_commission_expense_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مصروف عمولة المكتب (مدين)"/>
+                                </group>
+                                <group>
+                                    <field name="office_commission_payable_account_id"
+                                           options="{'no_create': True}"
+                                           string="حساب مستحقات المكتب (دائن)"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_sair_settings_list" model="ir.ui.view">
+        <field name="name">sair.settings.list</field>
+        <field name="model">sair.settings</field>
+        <field name="arch" type="xml">
+            <list string="إعدادات السير المتصل">
+                <field name="company_id"/>
+                <field name="operating_expense_journal_id"/>
+                <field name="settlement_journal_id"/>
+                <field name="internal_settlement_journal_id"/>
+                <field name="office_commission_journal_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_sair_settings" model="ir.actions.act_window">
+        <field name="name">الإعدادات</field>
+        <field name="res_model">sair.settings</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أضف إعدادات السير المتصل لشركتك
+            </p>
+            <p>حدد اليوميات والحسابات لكل عملية في النظام</p>
+        </field>
+    </record>
+
+</odoo>
