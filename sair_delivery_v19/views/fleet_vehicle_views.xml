@@ -6,10 +6,9 @@
         <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
         <field name="arch" type="xml">
 
-            <!-- مركز التكلفة — بعد حقل التاجز في header -->
-            <xpath expr="//field[@name='company_id']" position="after">
-                <field name="analytic_account_id" string="مركز التكلفة"
-                       options="{'no_create': True, 'no_quick_create': True}"/>
+            <!-- مركز التكلفة — داخل قسم السيارة (Vehicle) -->
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="analytic_account_id" string="مركز التكلفة"/>
             </xpath>
 
             <!-- 2. السمارتبوتنات -->

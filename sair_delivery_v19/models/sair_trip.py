@@ -263,10 +263,24 @@ class SairTrip(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if vals.get('cash_collected'):
-            for rec in self:
-                if not rec.amana_id:
-                    rec._create_amana()
+        for rec in self:
+            if rec.state == 'draft':
+                if rec.cash_collected:
+                    if not rec.amana_id:
+                        rec._create_amana()
+                    else:
+                        rec.amana_id.write({
+                            'amount': rec.trip_amount,
+                            'partner_id': rec.partner_id.id if rec.partner_id else False,
+                            'vehicle_id': rec.vehicle_id.id if rec.vehicle_id else False,
+                            'amana_date': rec.trip_date,
+                            'driver_type': rec.driver_type,
+                        })
+                else:
+                    if rec.amana_id:
+                        amana = rec.amana_id
+                        rec.amana_id = False
+                        amana.unlink()
         return res
 
     def _create_amana(self):
