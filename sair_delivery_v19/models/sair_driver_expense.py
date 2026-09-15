@@ -23,6 +23,7 @@ class SairDriverExpense(models.Model):
             ('internal',   'سائق داخلي'),
             ('external',   'سائق خارجي 50/50'),
             ('commission', 'سائق بالعمولة'),
+            ('percentage', 'سائق بالنسبة (%)'),
         ],
         string='نوع السائق', required=True, index=True,
     )

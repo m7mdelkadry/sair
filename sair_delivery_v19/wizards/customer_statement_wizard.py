@@ -44,6 +44,9 @@ class CustomerStatementWizard(models.TransientModel):
             if t.driver_type == 'commission':
                 comm_co  = t.company_commission
                 comm_off = t.office_commission
+            elif t.driver_type == 'percentage':
+                comm_co  = t.company_percentage_amount
+                comm_off = t.office_percentage_amount
             elif t.driver_type == 'external':
                 comm_co  = t.company_share
                 comm_off = 0.0
@@ -52,19 +55,20 @@ class CustomerStatementWizard(models.TransientModel):
                 comm_off = 0.0
 
             lines.append({
-                'date':       str(t.trip_date),
-                'trip_name':  t.name,
-                'trip_type':  self.TRIP_TYPE_AR.get(t.trip_type, ''),
-                'driver':     t.driver_display or '',
-                'vehicle':    t.vehicle_id.license_plate if t.vehicle_id else '',
-                'debit':      t.trip_amount,
-                'comm_co':    comm_co,
-                'comm_off':   comm_off,
-                'balance':    balance,
-                'notes':      t.description or '',
-                'cash':       'نعم' if t.cash_collected else '',
-                'invoice_no': t.invoice_id.name if t.invoice_id else '',
-                'state':      t.state,
+                'date':             str(t.trip_date),
+                'trip_name':        t.name,
+                'trip_type':        self.TRIP_TYPE_AR.get(t.trip_type, ''),
+                'driver':           t.driver_display or '',
+                'container_number': t.container_number or '',
+                'vehicle':          t.vehicle_id.license_plate if t.vehicle_id else '',
+                'debit':            t.trip_amount,
+                'comm_co':          comm_co,
+                'comm_off':         comm_off,
+                'balance':          balance,
+                'notes':            t.description or '',
+                'cash':             'نعم' if t.cash_collected else '',
+                'invoice_no':       t.invoice_id.name if t.invoice_id else '',
+                'state':            t.state,
             })
 
         return {

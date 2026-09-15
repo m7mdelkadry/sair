@@ -93,6 +93,15 @@
                             <field name="office_commission" readonly="1"
                                    string="عمولة المكتب"
                                    invisible="driver_type != 'commission'"/>
+                            <field name="driver_revenue_share" readonly="1"
+                                   string="مبلغ السائق (بالنسبة)"
+                                   invisible="driver_type != 'percentage'"/>
+                            <field name="company_revenue_share" readonly="1"
+                                   string="مبلغ الشركة (بالنسبة)"
+                                   invisible="driver_type != 'percentage'"/>
+                            <field name="office_commission" readonly="1"
+                                   string="مبلغ المكتب"
+                                   invisible="driver_type != 'percentage'"/>
                         </group>
                         <group string="المصاريف">
                             <field name="total_expenses" readonly="1"/>
@@ -129,6 +138,10 @@
                                            invisible="parent.driver_type != 'commission'"/>
                                     <field name="company_commission" sum="عمولة الشركة"
                                            invisible="parent.driver_type != 'commission'"/>
+                                    <field name="driver_percentage_amount" sum="مبلغ السائق"
+                                           invisible="parent.driver_type != 'percentage'"/>
+                                    <field name="company_percentage_amount" sum="مبلغ الشركة"
+                                           invisible="parent.driver_type != 'percentage'"/>
                                     <field name="driver_share"     sum="حصة السائق 50%"
                                            invisible="parent.driver_type != 'external'"/>
                                     <field name="company_share"    sum="حصة الشركة 50%"

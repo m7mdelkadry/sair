@@ -31,6 +31,7 @@ class SairTrip(models.Model):
     trip_amount = fields.Float(
         string='قيمة الرحلة (SAR)', required=True, digits=(10, 2),
     )
+    container_number = fields.Char(string='رقم الحاوية', tracking=True)
     description = fields.Char(string='ملاحظة / وصف الرحلة')
 
     # ── السائق ───────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ class SairTrip(models.Model):
             ('internal', 'سائق داخلي - موظف'),
             ('external', 'سائق خارجي - 50/50'),
             ('commission', 'سائق بالعمولة'),
+            ('percentage', 'سائق بالنسبة (%)'),
         ],
         string='نوع السائق', required=True, index=True, tracking=True,
     )
@@ -66,6 +68,23 @@ class SairTrip(models.Model):
     )
     driver_commission = fields.Float(
         string='عمولة السائق (SAR)', digits=(10, 2), tracking=True,
+    )
+
+    # ── تفاصيل النسبة (تظهر فقط لـ percentage) ────────────────────────────────
+
+    driver_percentage = fields.Float(
+        string='نسبة السائق (%)', digits=(5, 2), tracking=True,
+    )
+    driver_percentage_amount = fields.Float(
+        string='مبلغ السائق (SAR)', compute='_compute_percentage_fields',
+        store=True, readonly=False, digits=(10, 2), tracking=True,
+    )
+    company_percentage_amount = fields.Float(
+        string='مبلغ الشركة (SAR)', compute='_compute_percentage_fields',
+        store=True, readonly=False, digits=(10, 2), tracking=True,
+    )
+    office_percentage_amount = fields.Float(
+        string='مبلغ المكتب (SAR)', digits=(10, 2), tracking=True,
     )
 
     # ── العميل ───────────────────────────────────────────────────────────────
@@ -127,12 +146,12 @@ class SairTrip(models.Model):
     month_year = fields.Char(string='الشهر/السنة', compute='_compute_month_year', store=True, index=True)
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True, index=True)
 
-    # ── حقول المتبقي (لتوزيع العمولات والمصاريف) ────────────────────────────
+    # ── حقول المتبقي (لتوزيع العمولات والنسب والمصاريف) ─────────────────────────
 
     remaining_for_commissions = fields.Float(
         string='المتبقي من قيمة الرحلة',
         compute='_compute_remaining_commissions', digits=(10, 2),
-        help='قيمة الرحلة - عمولة الشركة - عمولة المكتب - عمولة السائق = لازم تكون صفر',
+        help='قيمة الرحلة - المبالغ الموزعة = لازم تكون صفر',
     )
 
     # ── حقول السمارت بوتن ──────────────────────────────────────────────────
@@ -143,7 +162,17 @@ class SairTrip(models.Model):
 
     # ── Compute Methods ───────────────────────────────────────────────────────
 
-    @api.depends('trip_amount', 'driver_type', 'company_commission', 'driver_commission')
+    @api.depends('trip_amount', 'driver_percentage', 'office_percentage_amount', 'driver_type')
+    def _compute_percentage_fields(self):
+        for rec in self:
+            if rec.driver_type == 'percentage':
+                rec.driver_percentage_amount = round(rec.trip_amount * (rec.driver_percentage / 100.0), 2)
+                rec.company_percentage_amount = max(0.0, rec.trip_amount - rec.driver_percentage_amount - rec.office_percentage_amount)
+            else:
+                rec.driver_percentage_amount = 0.0
+                rec.company_percentage_amount = 0.0
+
+    @api.depends('trip_amount', 'driver_type', 'company_commission', 'driver_commission', 'driver_percentage_amount', 'company_percentage_amount')
     def _compute_shares(self):
         for rec in self:
             if rec.driver_type == 'external':
@@ -156,9 +185,13 @@ class SairTrip(models.Model):
                 rec.driver_share = 0.0
                 rec.company_share = rec.trip_amount
 
-    @api.depends('trip_amount', 'company_commission', 'driver_commission', 'office_commission', 'driver_type')
+    @api.depends(
+        'trip_amount', 'driver_type',
+        'company_commission', 'driver_commission', 'office_commission',
+        'company_percentage_amount', 'driver_percentage_amount', 'office_percentage_amount',
+    )
     def _compute_remaining_commissions(self):
-        """المتبقي من قيمة الرحلة بعد توزيع العمولات الثلاث."""
+        """المتبقي من قيمة الرحلة بعد توزيع العمولات أو النسب."""
         for rec in self:
             if rec.driver_type == 'commission':
                 rec.remaining_for_commissions = (
@@ -166,6 +199,13 @@ class SairTrip(models.Model):
                     - rec.company_commission
                     - rec.office_commission
                     - rec.driver_commission
+                )
+            elif rec.driver_type == 'percentage':
+                rec.remaining_for_commissions = (
+                    rec.trip_amount
+                    - rec.company_percentage_amount
+                    - rec.office_percentage_amount
+                    - rec.driver_percentage_amount
                 )
             else:
                 rec.remaining_for_commissions = 0.0
@@ -183,10 +223,10 @@ class SairTrip(models.Model):
         for rec in self:
             rec.month_year = rec.trip_date.strftime('%Y-%m') if rec.trip_date else ''
 
-    @api.depends('invoice_id')
+    @api.depends('invoice_id', 'invoice_id.state')
     def _compute_has_invoice(self):
         for rec in self:
-            rec.has_invoice = bool(rec.invoice_id)
+            rec.has_invoice = bool(rec.invoice_id and rec.invoice_id.state != 'cancel')
 
     # ═══════════════════════════════════════════════════════════════════════
     #  الأناليتك (يُسحب من الفليت فقط)
@@ -329,14 +369,12 @@ class SairTrip(models.Model):
             if rec.state != 'draft':
                 raise ValidationError('الرحلة مش في حالة مسودة.')
 
-            # ── فحص توزيع العمولات (للسائق بالعمولة فقط) ──
-            if rec.driver_type == 'commission':
+            # ── فحص توزيع العمولات والنسب (للسائق بالعمولة والنسبة) ──
+            if rec.driver_type in ('commission', 'percentage'):
                 if not float_is_zero(rec.remaining_for_commissions, precision_digits=2):
                     raise ValidationError(
                         f'المتبقي من قيمة الرحلة: {rec.remaining_for_commissions:.2f} SAR\n'
-                        'لازم توزع قيمة الرحلة كاملة بين (عمولة الشركة + عمولة المكتب + عمولة السائق).\n'
-                        f'القيمة المدخلة: {rec.company_commission + rec.office_commission + rec.driver_commission:.2f} '
-                        f'من أصل {rec.trip_amount:.2f}'
+                        'لازم توزع قيمة الرحلة كاملة حتى يصل المتبقي إلى صفر.'
                     )
 
             rec.state = 'confirmed'
@@ -363,13 +401,14 @@ class SairTrip(models.Model):
         self.ensure_one()
         if not self.customer_id:
             raise ValidationError('لازم تحدد العميل أولاً قبل إنشاء الفاتورة.')
-        if self.invoice_id:
+        if self.invoice_id and self.invoice_id.state != 'cancel':
             raise ValidationError('في فاتورة مرتبطة بالفعل — رقمها: %s' % self.invoice_id.name)
 
         product = self._get_delivery_product()
         analytic = {str(self.analytic_account_id.id): 100} if self.analytic_account_id else {}
 
         line_name = self.description if self.description else 'خدمة توصيل'
+        vehicle_disp = f"{self.vehicle_id.name} | {self.vehicle_id.license_plate}" if self.vehicle_id else ''
 
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -381,6 +420,10 @@ class SairTrip(models.Model):
             'invoice_line_ids': [(0, 0, {
                 'product_id': product.id,
                 'name': line_name,
+                'sair_trip_id': self.id,
+                'sair_driver_display': self.driver_display or '',
+                'sair_vehicle_display': vehicle_disp,
+                'sair_container_number': self.container_number or '',
                 'quantity': 1,
                 'price_unit': self.trip_amount,
                 'analytic_distribution': analytic,
@@ -390,6 +433,89 @@ class SairTrip(models.Model):
         self.message_post(
             body=f'تم إنشاء الفاتورة: <a href="/odoo/accounting/customer-invoices/{invoice.id}">{invoice.name or "مسودة"}</a>'
         )
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'res_id': invoice.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def action_create_grouped_invoices(self):
+        """
+        أنشئ فاتورة مجمعة واحدة للرحلات المختارة من شاشة القائمة.
+        """
+        if not self:
+            raise ValidationError('يرجى تحديد الرحلات المراد إنشاء فاتورة مجمعة لها أولاً!')
+
+        # 1. التحقق من أن جميع الرحلات تتبع نفس العميل
+        customers = self.mapped('customer_id')
+        if not customers or len(customers) > 1:
+            raise ValidationError('جميع الرحلات المختارة لازم تكون لنفس العميل!')
+
+        customer = customers[0]
+        if not customer:
+            raise ValidationError('لازم تحدد العميل على جميع الرحلات المختارة!')
+
+        # 2. التحقق من عدم وجود فواتير سابقة غير ملغاة للرحلات المختارة
+        invoiced_trips = self.filtered(lambda t: t.has_invoice or (t.invoice_id and t.invoice_id.state != 'cancel'))
+        if invoiced_trips:
+            trip_names = ", ".join(invoiced_trips.mapped('name'))
+            raise ValidationError(f'الرحلات التالية تم إصدار فواتير فعالة لها بالفعل ولا يمكن تكرار الفاتورة:\n{trip_names}')
+
+        # 3. التحقق من أن جميع الرحلات مؤكدة وليست مسودة
+        draft_trips = self.filtered(lambda t: t.state == 'draft')
+        if draft_trips:
+            trip_names = ", ".join(draft_trips.mapped('name'))
+            raise ValidationError(f'الرحلات التالية في حالة مسودة ولا يمكن مفوترتها حتى التأكيد أولاً:\n{trip_names}')
+
+        product = self._get_delivery_product()
+
+        invoice_lines = []
+        trip_refs = []
+        max_date = max(self.mapped('trip_date'))
+
+        for trip in self.sorted(key=lambda t: (t.trip_date, t.id)):
+            trip_refs.append(trip.name)
+            analytic = {str(trip.analytic_account_id.id): 100} if trip.analytic_account_id else {}
+            vehicle_disp = f"{trip.vehicle_id.name} | {trip.vehicle_id.license_plate}" if trip.vehicle_id else ''
+
+            line_name = trip.description if trip.description else 'خدمة توصيل'
+
+            invoice_lines.append((0, 0, {
+                'product_id': product.id,
+                'name': line_name,
+                'sair_trip_id': trip.id,
+                'sair_driver_display': trip.driver_display or '',
+                'sair_vehicle_display': vehicle_disp,
+                'sair_container_number': trip.container_number or '',
+                'quantity': 1,
+                'price_unit': trip.trip_amount,
+                'analytic_distribution': analytic,
+            }))
+
+        ref_str = ", ".join(trip_refs)
+        if len(ref_str) > 100:
+            ref_str = f"فاتورة مجمعة — {len(self)} رحلات ({trip_refs[0]} إلى {trip_refs[-1]})"
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': customer.id,
+            'invoice_date': max_date,
+            'ref': ref_str,
+            'narration': f'فاتورة مجمعة لخدمات التوصيل — إجمالي الرحلات: {len(self)}',
+            'company_id': self.env.company.id,
+            'invoice_line_ids': invoice_lines,
+        })
+
+        # ربط الفاتورة المجمعة بكافة الرحلات
+        self.write({'invoice_id': invoice.id})
+
+        for trip in self:
+            trip.message_post(
+                body=f'تم إصدار الفاتورة المجمعة: <a href="/odoo/accounting/customer-invoices/{invoice.id}">{invoice.name or "مسودة"}</a>'
+            )
+
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',

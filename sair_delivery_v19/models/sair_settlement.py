@@ -21,6 +21,7 @@ class SairSettlement(models.Model):
             ('internal', 'سائق داخلي - موظف'),
             ('external', 'سائق خارجي 50/50'),
             ('commission', 'سائق بالعمولة'),
+            ('percentage', 'سائق بالنسبة (%)'),
         ],
         string='نوع السائق', required=True, tracking=True, index=True,
     )
@@ -121,18 +122,11 @@ class SairSettlement(models.Model):
 
     # ═══════════════════════════════════════════════════════════════════════
     #  المنطق الموحد
-    #
-    #  net_to_driver  = rev_drv + cmp_exp   (حصة السائق + مصاريف الشركة عليه)
-    #  net_to_company = company_revenue_share - cmp_exp (عمولة الشركة - مصاريفها)
-    #
-    #  القيد المحاسبي دائماً:
-    #    DEBIT  مصروف عمولات        = drv_rev   (حصة/عمولة السائق بالكامل)
-    #    DEBIT  مصاريف تشغيل         = cmp_exp   (حصة الشركة من المصاريف فقط)
-    #    CREDIT مستحقات السائق       = drv_rev + cmp_exp
     # ═══════════════════════════════════════════════════════════════════════
 
     @api.depends(
         'trip_ids.driver_commission', 'trip_ids.company_commission',
+        'trip_ids.driver_percentage_amount', 'trip_ids.company_percentage_amount',
         'trip_ids.driver_share', 'trip_ids.company_share',
         'expense_ids.driver_expense_share', 'expense_ids.company_expense_share',
         'total_revenue', 'total_expenses', 'driver_type',
@@ -148,9 +142,7 @@ class SairSettlement(models.Model):
                 rec.company_revenue_share = rec.total_revenue * 0.50
                 rec.driver_expense_share = drv_exp
                 rec.company_expense_share = cmp_exp
-                # net_to_driver = حصة السائق (1000) + مصاريف الشركة (200) = 1200
                 rec.net_to_driver = rev_drv + cmp_exp
-                # صافي الشركة = حصتها من الإيراد - مصاريفها
                 rec.net_to_company = rec.company_revenue_share - cmp_exp
 
             elif rec.driver_type == 'commission':

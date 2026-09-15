@@ -3,29 +3,47 @@ import io
 from odoo import models, fields, api
 
 
+class AccountMoveLineExt(models.Model):
+    _inherit = 'account.move.line'
+
+    sair_trip_id = fields.Many2one('sair.trip', string='الرحلة', ondelete='set null')
+    sair_driver_display = fields.Char(string='السائق')
+    sair_vehicle_display = fields.Char(string='السيارة')
+    sair_container_number = fields.Char(string='رقم الحاوية')
+
+
 class AccountMoveExt(models.Model):
     _inherit = 'account.move'
 
+    sair_trip_ids = fields.One2many('sair.trip', 'invoice_id', string='الرحلات المرتبطة')
     sair_trip_id = fields.Many2one('sair.trip', string='رقم الرحلة', compute='_compute_sair_trip', store=True)
     sair_driver_display = fields.Char(string='السائق', compute='_compute_sair_trip', store=True)
     sair_vehicle_display = fields.Char(string='السيارة | رقم اللوحة', compute='_compute_sair_trip', store=True)
+    sair_container_number = fields.Char(string='رقم الحاوية', compute='_compute_sair_trip', store=True)
+    is_grouped_sair_invoice = fields.Boolean(string='فاتورة رحلات مجمعة؟', compute='_compute_sair_trip', store=True)
+    sair_trip_count = fields.Integer(string='عدد الرحلات', compute='_compute_sair_trip', store=True)
     zatca_qr_code = fields.Char(string='QR Code ZATCA (TLV)', compute='_compute_zatca_qr', store=True)
     zatca_qr_image = fields.Binary(string='صورة QR Code', compute='_compute_zatca_qr', store=True, attachment=False)
 
-    @api.depends('name', 'state')
+    @api.depends('sair_trip_ids', 'name', 'state')
     def _compute_sair_trip(self):
-        """يجيب الرحلة عن طريق الـ FK مباشرة (سريع وآمن)"""
+        """يجيب الرحلات المرتبطة وحساب بيانات الفاتورة المجمعة أو المفردة"""
         for move in self:
-            trip = self.env['sair.trip'].sudo().search([('invoice_id', '=', move.id)], limit=1) if move.id else \
-            self.env['sair.trip'].browse()
-            if trip:
+            trips = move.sair_trip_ids or (self.env['sair.trip'].sudo().search([('invoice_id', '=', move.id)]) if move.id else self.env['sair.trip'].browse())
+            move.sair_trip_count = len(trips)
+            move.is_grouped_sair_invoice = (len(trips) > 1)
+
+            if len(trips) == 1:
+                trip = trips[0]
                 move.sair_trip_id = trip.id
                 move.sair_driver_display = trip.driver_display or ''
                 move.sair_vehicle_display = f"{trip.vehicle_id.name} | {trip.vehicle_id.license_plate}" if trip.vehicle_id else ''
+                move.sair_container_number = trip.container_number or ''
             else:
                 move.sair_trip_id = False
                 move.sair_driver_display = ''
                 move.sair_vehicle_display = ''
+                move.sair_container_number = ''
 
     def write(self, vals):
         res = super().write(vals)

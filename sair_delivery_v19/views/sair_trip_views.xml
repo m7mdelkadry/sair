@@ -69,6 +69,7 @@
                         <group string="بيانات الرحلة">
                             <field name="trip_date"/>
                             <field name="trip_type"/>
+                            <field name="container_number"/>
                             <field name="trip_amount"/>
                             <field name="description"/>
                             <field name="vehicle_id"/>
@@ -98,6 +99,31 @@
                         </group>
                         <group>
                             <!-- المتبقي: لازم يكون صفر عشان نأكد الرحلة -->
+                            <field name="remaining_for_commissions" readonly="1"
+                                   string="المتبقي من قيمة الرحلة"/>
+                            <div invisible="remaining_for_commissions != 0"
+                                 style="color: #27ae60; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                التوزيع مكتمل — يمكنك التأكيد
+                            </div>
+                            <div invisible="remaining_for_commissions == 0"
+                                 style="color: #c0392b; font-weight: bold; padding: 8px 0; font-size: 14px;">
+                                المتبقي غير صفري — لن يمكنك التأكيد حتى يصل صفر
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         توزيع النسبة (سائق بالنسبة فقط)
+                    ══════════════════════════════════════════════════════ -->
+                    <group string="تفاصيل النسبة"
+                           invisible="driver_type != 'percentage'">
+                        <group>
+                            <field name="driver_percentage"/>
+                            <field name="driver_percentage_amount"/>
+                            <field name="company_percentage_amount"/>
+                            <field name="office_percentage_amount"/>
+                        </group>
+                        <group>
                             <field name="remaining_for_commissions" readonly="1"
                                    string="المتبقي من قيمة الرحلة"/>
                             <div invisible="remaining_for_commissions != 0"
@@ -146,6 +172,7 @@
                   decoration-warning="state=='draft'">
                 <field name="name"/>
                 <field name="trip_date"/>
+                <field name="container_number" optional="show"/>
                 <field name="customer_id"/>
                 <field name="driver_display"/>
                 <field name="driver_type"/>
@@ -168,6 +195,7 @@
         <field name="arch" type="xml">
             <search string="بحث في الرحلات">
                 <field name="name"/>
+                <field name="container_number"/>
                 <field name="driver_display"/>
                 <field name="vehicle_id"/>
                 <field name="customer_id"/>
@@ -180,6 +208,7 @@
                 <filter string="موظف"         name="internal"    domain="[('driver_type','=','internal')]"/>
                 <filter string="خارجي 50/50"  name="external"    domain="[('driver_type','=','external')]"/>
                 <filter string="بالعمولة"     name="commission"  domain="[('driver_type','=','commission')]"/>
+                <filter string="بالنسبة (%)"  name="percentage"  domain="[('driver_type','=','percentage')]"/>
             </search>
         </field>
     </record>
@@ -192,6 +221,18 @@
         <field name="context">{'search_default_confirmed': 1}</field>
     </record>
 
+    <!-- ══ أكتشن إنشاء فاتورة مجمعة من قائمة الرحلات ══ -->
+    <record id="action_create_grouped_invoice" model="ir.actions.server">
+        <field name="name">إنشاء فاتورة مجمعة</field>
+        <field name="model_id" ref="model_sair_trip"/>
+        <field name="binding_model_id" ref="model_sair_trip"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = records.action_create_grouped_invoices()
+        </field>
+    </record>
+
 
     <!-- ══ حقول السير المتصل على شاشة الفاتورة ══ -->
     <record id="view_account_move_sair_inherit" model="ir.ui.view">
@@ -200,19 +241,31 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="is_grouped_sair_invoice" invisible="1"/>
+                <field name="sair_trip_count" invisible="1"/>
                 <field name="sair_trip_id"
                        string="رقم الرحلة"
                        readonly="1"
-                       invisible="not sair_trip_id"
+                       invisible="not sair_trip_id or is_grouped_sair_invoice"
                        widget="many2one_avatar"/>
                 <field name="sair_driver_display"
                        string="السائق"
                        readonly="1"
-                       invisible="not sair_trip_id"/>
+                       invisible="not sair_trip_id or is_grouped_sair_invoice"/>
                 <field name="sair_vehicle_display"
                        string="السيارة | رقم اللوحة"
                        readonly="1"
-                       invisible="not sair_trip_id"/>
+                       invisible="not sair_trip_id or is_grouped_sair_invoice"/>
+                <field name="sair_container_number"
+                       string="رقم الحاوية"
+                       readonly="1"
+                       invisible="not sair_trip_id or is_grouped_sair_invoice"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='name']" position="before">
+                <field name="sair_trip_id" string="الرحلة" optional="show" readonly="1"/>
+                <field name="sair_driver_display" string="السائق" optional="show" readonly="1"/>
+                <field name="sair_vehicle_display" string="السيارة" optional="show" readonly="1"/>
+                <field name="sair_container_number" string="رقم الحاوية" optional="show" readonly="1"/>
             </xpath>
         </field>
     </record>
