@@ -460,7 +460,7 @@
                                 <td style="padding:6px 12px; border-bottom:1px solid #ccc; border-left:1.5px solid #1F3C4D; border-right:none; border-top:none; vertical-align:middle;">
                                     <span style="font-weight:bold; float:right; width:95px; white-space:nowrap; text-align:right;">رقم العميل:</span>
                                     <div style="margin-right:100px; text-align:center; font-weight:bold; color:#1F3C4D; direction:ltr; unicode-bidi:embed;">
-                                        <t t-esc="doc.customer_id.phone or doc.customer_id.mobile or ''"/>
+                                        <t t-esc="doc.customer_id.phone or ''"/>
                                     </div>
                                 </td>
                                 <td style="padding:6px 12px; border-bottom:1px solid #ccc; border-left:none; border-right:none; border-top:none; vertical-align:middle;">
@@ -613,7 +613,7 @@
                                 <div style="float:left;">
                                     <div style="font-weight:bold; color:#1F3C4D; font-size:9.5px; line-height:1.2;">Phone</div>
                                     <div style="color:#444; font-size:9px; line-height:1.2;">
-                                        <t t-esc="comp.phone or comp.mobile or ''"/>
+                                        <t t-esc="comp.phone or ''"/>
                                     </div>
                                 </div>
                                 <div style="clear:both;"/>
