@@ -76,20 +76,20 @@ class SairDriverTripsWizard(models.TransientModel):
         if self.state != 'all':
             domain.append(('state', '=', self.state))
 
-        trips = self.env['sair.trip'].search(domain, order='trip_date asc, id asc')
+        trips = self.env['sair.trip'].search(domain, order='driver_type asc, partner_id asc, trip_date asc, id asc')
 
+        # تجميع الرحلات بحسب نوع السائق فقط (جدول واحد لكل نوع)
         grouped_data = {}
+
+        # ترتيب الأنواع بحسب أولويات ثابتة
+        type_order = ['external', 'commission', 'percentage', 'internal']
 
         for t in trips:
             dtype = t.driver_type
-            driver_name = t.driver_display or 'غير محدد'
-            group_key = (dtype, driver_name)
-
-            if group_key not in grouped_data:
-                grouped_data[group_key] = {
+            if dtype not in grouped_data:
+                grouped_data[dtype] = {
                     'driver_type': dtype,
                     'driver_type_ar': self.DRIVER_TYPE_AR.get(dtype, dtype),
-                    'driver_name': driver_name,
                     'trips': [],
                     'total_amount': 0.0,
                     'total_ext_comm': 0.0,
@@ -105,7 +105,7 @@ class SairDriverTripsWizard(models.TransientModel):
                     'count': 0,
                 }
 
-            g = grouped_data[group_key]
+            g = grouped_data[dtype]
             g['count'] += 1
             g['total_amount'] += t.trip_amount
 
@@ -125,6 +125,7 @@ class SairDriverTripsWizard(models.TransientModel):
             g['trips'].append({
                 'name': t.name,
                 'date': str(t.trip_date),
+                'driver': t.driver_display or '',
                 'trip_type': self.TRIP_TYPE_AR.get(t.trip_type, t.trip_type),
                 'customer': t.customer_id.name if t.customer_id else '',
                 'container': t.container_number or '',
@@ -145,7 +146,20 @@ class SairDriverTripsWizard(models.TransientModel):
                 'notes': t.description or '',
             })
 
-        selected_driver_disp = ", ".join(self.partner_ids.mapped('name')) if self.partner_ids else 'الكل'
+        # فرز المجموعات بنفس ترتيب الأنواع
+        sorted_groups = []
+        for dt in type_order:
+            if dt in grouped_data:
+                sorted_groups.append(grouped_data[dt])
+        for dt, g in grouped_data.items():
+            if dt not in type_order:
+                sorted_groups.append(g)
+
+        selected_driver_names = []
+        if self.partner_ids:
+            selected_driver_names.extend(self.partner_ids.mapped('name'))
+
+        selected_driver_disp = ", ".join(selected_driver_names) if selected_driver_names else 'الكل'
 
         return {
             'date_from': str(self.date_from),
@@ -154,7 +168,7 @@ class SairDriverTripsWizard(models.TransientModel):
             'driver_type_ar': self.DRIVER_TYPE_AR.get(self.driver_type, 'جميع الأنواع'),
             'selected_driver_name': selected_driver_disp,
             'state_ar': dict(self._fields['state'].selection).get(self.state, 'الكل'),
-            'groups': list(grouped_data.values()),
+            'groups': sorted_groups,
             'grand_count': len(trips),
             'grand_amount': sum(t.trip_amount for t in trips),
         }

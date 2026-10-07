@@ -24,7 +24,7 @@
                             <div>
                                 <h2 style="margin: 0; color: #1a252f; font-weight: bold;">كشف رحلات السائقين</h2>
                                 <p style="margin: 3px 0 0 0; color: #555555; font-size: 13px;">
-                                    نوع السائق: <strong><span t-out="rep['driver_type_ar']"/></strong> | السائق: <strong><span t-out="rep['selected_driver_name']"/></strong>
+                                    نوع السائق: <strong><span t-out="rep['driver_type_ar']"/></strong> | السائقين: <strong><span t-out="rep['selected_driver_name']"/></strong>
                                 </p>
                             </div>
                             <div style="text-align: left; font-size: 12px; color: #555;">
@@ -33,53 +33,53 @@
                             </div>
                         </div>
 
-                        <!-- Loop Over Driver Groups -->
+                        <!-- Loop Over Driver Groups (Grouped strictly by Driver Type) -->
                         <t t-foreach="rep['groups']" t-as="g">
-                            <div style="margin-bottom: 22px; page-break-inside: avoid;">
+                            <div style="margin-bottom: 25px; page-break-inside: avoid;">
 
-                                <!-- Group Sub-Header -->
-                                <div style="background-color: #2c3e50; color: #ffffff; padding: 6px 12px; font-weight: bold; font-size: 13px; border-radius: 3px 3px 0 0; display: flex; justify-content: space-between;">
-                                    <span>السائق: <span t-out="g['driver_name']"/> (<span t-out="g['driver_type_ar']"/>)</span>
-                                    <span>عدد الرحلات: <span t-out="g['count']"/></span>
+                                <!-- Group Sub-Header (Driver Type Header) -->
+                                <div style="background-color: #2c3e50; color: #ffffff; padding: 7px 12px; font-weight: bold; font-size: 13px; border-radius: 3px 3px 0 0; display: flex; justify-content: space-between;">
+                                    <span>نوع السائق: <span t-out="g['driver_type_ar']"/></span>
+                                    <span>إجمالي الرحلات: <span t-out="g['count']"/> رحلة</span>
                                 </div>
 
-                                <!-- Dynamic Adaptive Table Based on Driver Type -->
-                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 0; border: 1px solid #bdc3c7;">
+                                <!-- Table Per Driver Type -->
+                                <table style="width: 100%; border-collapse: collapse; font-size: 10.5px; margin-top: 0; border: 1px solid #bdc3c7;">
                                     <thead>
                                         <tr style="background-color: #ecf0f1; color: #2c3e50; text-align: center; font-weight: bold;">
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 4%;">#</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%;">تاريخ</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%;">الرحلة</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 14%;">العميل</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%;">السيارة</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9%;">الحاوية</th>
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%;">قيمة الرحلة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 3.5%;">#</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8.5%;">تاريخ</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%;">الرحلة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%;">السائق</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%;">العميل</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%;">السيارة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8%;">الحاوية</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%;">قيمة الرحلة</th>
 
                                             <!-- 1. 50/50 Columns -->
                                             <t t-if="g['driver_type'] == 'external'">
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #c0392b;">عمولة خارجية</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #d35400;">عمولة الشركة</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #27ae60;">حصة السائق 50%</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #2980b9;">حصة الشركة 50%</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8.5%; color: #c0392b;">عمولة خارجية</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8.5%; color: #d35400;">عمولة الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9.5%; color: #27ae60;">حصة السائق 50%</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9.5%; color: #2980b9;">حصة الشركة 50%</th>
                                             </t>
 
                                             <!-- 2. Commission Columns -->
                                             <t t-elif="g['driver_type'] == 'commission'">
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 13%; color: #27ae60;">عمولة السائق</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 13%; color: #2980b9;">عمولة الشركة</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 14%; color: #8e44ad;">عمولة المكتب</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%; color: #27ae60;">عمولة السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%; color: #2980b9;">عمولة الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%; color: #8e44ad;">عمولة المكتب</th>
                                             </t>
 
                                             <!-- 3. Percentage Columns -->
                                             <t t-elif="g['driver_type'] == 'percentage'">
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8%;">نسبة السائق</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%; color: #27ae60;">مبلغ السائق</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%; color: #2980b9;">مبلغ الشركة</th>
-                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #8e44ad;">مبلغ المكتب</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 7%;">نسبة السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #27ae60;">مبلغ السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #2980b9;">مبلغ الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9%; color: #8e44ad;">مبلغ المكتب</th>
                                             </t>
 
-                                            <!-- Common columns -->
-                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9%;">الحالة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 7%;">الحالة</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -89,6 +89,7 @@
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="idx"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['date']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px; font-weight: bold;"><span t-out="t['name']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px; font-weight: bold; text-align: right; color: #2c3e50;"><span t-out="t['driver']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px; text-align: right;"><span t-out="t['customer']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['vehicle']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['container']"/></td>
@@ -122,14 +123,14 @@
                                             <t t-set="idx" t-value="idx + 1"/>
                                         </t>
 
-                                        <!-- Subtotal row for driver group -->
+                                        <!-- Subtotal row for Driver Type group -->
                                         <tr style="background-color: #eaedd1; font-weight: bold; text-align: center;">
-                                            <td colspan="6" style="border: 1px solid #bdc3c7; padding: 6px; text-align: right;">إجمالي السائق (<span t-out="g['driver_name']"/>):</td>
+                                            <td colspan="7" style="border: 1px solid #bdc3c7; padding: 6px; text-align: right;">إجمالي (<span t-out="g['driver_type_ar']"/>):</td>
                                             <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_amount']"/></td>
 
                                             <t t-if="g['driver_type'] == 'external'">
-                                                <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_ext_comm']"/></td>
-                                                <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_ext_comp_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #c0392b;"><span t-out="'%.2f' % g['total_ext_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #d35400;"><span t-out="'%.2f' % g['total_ext_comp_comm']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 6px; color: #27ae60;"><span t-out="'%.2f' % g['total_driver_share']"/></td>
                                                 <td style="border: 1px solid #bdc3c7; padding: 6px; color: #2980b9;"><span t-out="'%.2f' % g['total_company_share']"/></td>
                                             </t>
