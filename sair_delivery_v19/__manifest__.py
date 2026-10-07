@@ -14,6 +14,7 @@
         'reports/settlement_report.xml',
         'reports/invoice_report.xml',
         'reports/performance_report.xml',
+        'reports/driver_trips_report.xml',
 
         'views/sair_trip_views.xml',
         'views/sair_amana_views.xml',
@@ -24,6 +25,7 @@
 
         'wizards/customer_statement_wizard_views.xml',
         'wizards/performance_wizard_views.xml',
+        'wizards/driver_trips_wizard_views.xml',
 
         'views/sair_settings_views.xml',
         'views/sair_menu.xml',

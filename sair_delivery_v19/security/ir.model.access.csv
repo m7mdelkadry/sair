@@ -9,6 +9,7 @@ access_sair_settlement_manager,sair.settlement.manager,model_sair_settlement,bas
 access_sair_settlement_user,sair.settlement.user,model_sair_settlement,base.group_user,1,0,0,0
 access_sair_customer_wizard_user,sair.customer.statement.wizard.user,model_sair_customer_statement_wizard,base.group_user,1,1,1,1
 access_sair_performance_wizard_user,sair.performance.wizard.user,model_sair_performance_wizard,base.group_user,1,1,1,1
+access_sair_driver_trips_wizard_user,sair.driver.trips.wizard.user,model_sair_driver_trips_wizard,base.group_user,1,1,1,1
 access_sair_office_commission_user,sair.office.commission.user,model_sair_office_commission,base.group_user,1,1,1,1
 access_sair_settings_manager,sair.settings.manager,model_sair_settings,base.group_system,1,1,1,1
 access_sair_settings_user,sair.settings.user,model_sair_settings,base.group_user,1,0,0,0

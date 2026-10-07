@@ -72,6 +72,12 @@
               action="sair_delivery_v19.action_customer_statement_wizard"
               sequence="10"/>
 
+    <menuitem id="menu_sair_report_driver_trips"
+              name="كشف رحلات السائقين"
+              parent="sair_delivery_v19.menu_sair_reports"
+              action="sair_delivery_v19.action_driver_trips_wizard"
+              sequence="15"/>
+
     <menuitem id="menu_sair_report_performance"
               name="تقرير أداء السيارة"
               parent="sair_delivery_v19.menu_sair_reports"

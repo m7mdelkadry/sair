@@ -70,6 +70,17 @@ class SairTrip(models.Model):
         string='عمولة السائق (SAR)', digits=(10, 2), tracking=True,
     )
 
+    # ── عمولات السائق الخارجي (تظهر لـ external 50/50) ─────────────────────────
+
+    external_commission = fields.Float(
+        string='العمولة الخارجية (SAR)', digits=(10, 2), tracking=True,
+        help='عمولة للمكتب الخارجي تقتطع من إجمالي الرحلة قبل تقسيم الـ 50/50',
+    )
+    external_company_commission = fields.Float(
+        string='عمولة الشركة (SAR)', digits=(10, 2), tracking=True,
+        help='عمولة للشركة تقتطع قبل تقسيم الـ 50/50',
+    )
+
     # ── تفاصيل النسبة (تظهر فقط لـ percentage) ────────────────────────────────
 
     driver_percentage = fields.Float(
@@ -172,12 +183,18 @@ class SairTrip(models.Model):
                 rec.driver_percentage_amount = 0.0
                 rec.company_percentage_amount = 0.0
 
-    @api.depends('trip_amount', 'driver_type', 'company_commission', 'driver_commission', 'driver_percentage_amount', 'company_percentage_amount')
+    @api.depends(
+        'trip_amount', 'driver_type',
+        'company_commission', 'driver_commission',
+        'driver_percentage_amount', 'company_percentage_amount',
+        'external_commission', 'external_company_commission',
+    )
     def _compute_shares(self):
         for rec in self:
             if rec.driver_type == 'external':
-                rec.driver_share = rec.trip_amount * 0.50
-                rec.company_share = rec.trip_amount * 0.50
+                net_base = max(0.0, rec.trip_amount - rec.external_commission - rec.external_company_commission)
+                rec.driver_share = round(net_base * 0.50, 2)
+                rec.company_share = round(net_base * 0.50, 2)
             elif rec.driver_type == 'commission':
                 rec.driver_share = rec.driver_commission
                 rec.company_share = rec.company_commission
@@ -258,6 +275,7 @@ class SairTrip(models.Model):
                 net -= rec.trip_expenses_total
             elif rec.driver_type == 'external':
                 net -= rec.driver_share
+                net -= rec.external_commission
                 net -= company_exp
             elif rec.driver_type == 'commission':
                 net -= rec.driver_commission
@@ -290,6 +308,9 @@ class SairTrip(models.Model):
             self.company_commission = 0.0
             self.office_commission = 0.0
             self.driver_commission = 0.0
+        if self.driver_type != 'external':
+            self.external_commission = 0.0
+            self.external_company_commission = 0.0
 
     # ── Create / Write ────────────────────────────────────────────────────────
 

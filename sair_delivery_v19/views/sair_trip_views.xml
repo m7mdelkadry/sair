@@ -138,14 +138,16 @@
                     </group>
 
                     <!-- ══════════════════════════════════════════════════════
-                         الحصص (50/50 خارجي)
+                         الحصص والعمولات (50/50 خارجي)
                     ══════════════════════════════════════════════════════ -->
-                    <group string="الحصص (50/50)"
+                    <group string="تفاصيل العمولات والحصص (50/50 خارجي)"
                            invisible="driver_type != 'external'">
-                        <group>
-                            <field name="driver_share"  readonly="1"/>
+                        <group string="العمولات المقتطعة">
+                            <field name="external_commission"/>
+                            <field name="external_company_commission"/>
                         </group>
-                        <group>
+                        <group string="الحصص الصافية (50/50)">
+                            <field name="driver_share"  readonly="1"/>
                             <field name="company_share" readonly="1"/>
                         </group>
                     </group>
@@ -178,6 +180,8 @@
                 <field name="driver_type"/>
                 <field name="vehicle_id"/>
                 <field name="trip_amount"    sum="إجمالي الإيراد"/>
+                <field name="external_commission" optional="hide" sum="إجمالي العمولة الخارجية"/>
+                <field name="external_company_commission" optional="hide" sum="إجمالي عمولة الشركة"/>
                 <field name="driver_share"   sum="إجمالي حصة السائق"/>
                 <field name="cash_collected" widget="boolean_toggle"/>
                 <field name="has_invoice"    widget="boolean_toggle" readonly="1"/>

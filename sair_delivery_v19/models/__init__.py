@@ -7,4 +7,5 @@ from . import sair_settlement
 from . import account_move_ext
 from . import report_customer_statement
 from . import report_performance
+from . import report_driver_trips
 from . import fleet_vehicle_ext

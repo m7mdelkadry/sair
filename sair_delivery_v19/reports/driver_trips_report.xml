@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Report Action ────────────────────────────────────────────────── -->
+    <record id="action_report_driver_trips" model="ir.actions.report">
+        <field name="name">كشف رحلات السائقين التفصيلي</field>
+        <field name="model">sair.driver.trips.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sair_delivery_v19.report_driver_trips</field>
+        <field name="report_file">sair_delivery_v19.report_driver_trips</field>
+        <field name="binding_model_id" ref="model_sair_driver_trips_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ── Report Template ──────────────────────────────────────────────── -->
+    <template id="report_driver_trips">
+        <t t-call="web.html_container">
+            <t t-foreach="reports_data" t-as="rep">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl" style="font-family: 'Amiri', 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; color: #2c3e50;">
+
+                        <!-- Header Title -->
+                        <div style="border-bottom: 2px solid #2c3e50; padding-bottom: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h2 style="margin: 0; color: #1a252f; font-weight: bold;">كشف رحلات السائقين</h2>
+                                <p style="margin: 3px 0 0 0; color: #555555; font-size: 13px;">
+                                    نوع السائق: <strong><span t-out="rep['driver_type_ar']"/></strong> | السائق: <strong><span t-out="rep['selected_driver_name']"/></strong>
+                                </p>
+                            </div>
+                            <div style="text-align: left; font-size: 12px; color: #555;">
+                                <div>الفترة من: <strong><span t-out="rep['date_from']"/></strong> إلى: <strong><span t-out="rep['date_to']"/></strong></div>
+                                <div>الحالة: <strong><span t-out="rep['state_ar']"/></strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Loop Over Driver Groups -->
+                        <t t-foreach="rep['groups']" t-as="g">
+                            <div style="margin-bottom: 22px; page-break-inside: avoid;">
+
+                                <!-- Group Sub-Header -->
+                                <div style="background-color: #2c3e50; color: #ffffff; padding: 6px 12px; font-weight: bold; font-size: 13px; border-radius: 3px 3px 0 0; display: flex; justify-content: space-between;">
+                                    <span>السائق: <span t-out="g['driver_name']"/> (<span t-out="g['driver_type_ar']"/>)</span>
+                                    <span>عدد الرحلات: <span t-out="g['count']"/></span>
+                                </div>
+
+                                <!-- Dynamic Adaptive Table Based on Driver Type -->
+                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 0; border: 1px solid #bdc3c7;">
+                                    <thead>
+                                        <tr style="background-color: #ecf0f1; color: #2c3e50; text-align: center; font-weight: bold;">
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 4%;">#</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%;">تاريخ</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%;">الرحلة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 14%;">العميل</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 12%;">السيارة</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9%;">الحاوية</th>
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%;">قيمة الرحلة</th>
+
+                                            <!-- 1. 50/50 Columns -->
+                                            <t t-if="g['driver_type'] == 'external'">
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #c0392b;">عمولة خارجية</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #d35400;">عمولة الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #27ae60;">حصة السائق 50%</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #2980b9;">حصة الشركة 50%</th>
+                                            </t>
+
+                                            <!-- 2. Commission Columns -->
+                                            <t t-elif="g['driver_type'] == 'commission'">
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 13%; color: #27ae60;">عمولة السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 13%; color: #2980b9;">عمولة الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 14%; color: #8e44ad;">عمولة المكتب</th>
+                                            </t>
+
+                                            <!-- 3. Percentage Columns -->
+                                            <t t-elif="g['driver_type'] == 'percentage'">
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 8%;">نسبة السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%; color: #27ae60;">مبلغ السائق</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 11%; color: #2980b9;">مبلغ الشركة</th>
+                                                <th style="border: 1px solid #bdc3c7; padding: 6px; width: 10%; color: #8e44ad;">مبلغ المكتب</th>
+                                            </t>
+
+                                            <!-- Common columns -->
+                                            <th style="border: 1px solid #bdc3c7; padding: 6px; width: 9%;">الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="idx" t-value="1"/>
+                                        <t t-foreach="g['trips']" t-as="t">
+                                            <tr style="text-align: center; border-bottom: 1px solid #e5e7e9;">
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="idx"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['date']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px; font-weight: bold;"><span t-out="t['name']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px; text-align: right;"><span t-out="t['customer']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['vehicle']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['container']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px; font-weight: bold;"><span t-out="'%.2f' % t['trip_amount']"/></td>
+
+                                                <!-- 50/50 cells -->
+                                                <t t-if="g['driver_type'] == 'external'">
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #c0392b;"><span t-out="'%.2f' % t['external_commission']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #d35400;"><span t-out="'%.2f' % t['external_company_commission']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #27ae60; font-weight: bold;"><span t-out="'%.2f' % t['driver_share']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #2980b9; font-weight: bold;"><span t-out="'%.2f' % t['company_share']"/></td>
+                                                </t>
+
+                                                <!-- Commission cells -->
+                                                <t t-elif="g['driver_type'] == 'commission'">
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #27ae60; font-weight: bold;"><span t-out="'%.2f' % t['driver_commission']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #2980b9;"><span t-out="'%.2f' % t['company_commission']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #8e44ad;"><span t-out="'%.2f' % t['office_commission']"/></td>
+                                                </t>
+
+                                                <!-- Percentage cells -->
+                                                <t t-elif="g['driver_type'] == 'percentage'">
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="'%.2f' % t['driver_percentage']"/>%</td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #27ae60; font-weight: bold;"><span t-out="'%.2f' % t['driver_percentage_amount']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #2980b9;"><span t-out="'%.2f' % t['company_percentage_amount']"/></td>
+                                                    <td style="border: 1px solid #bdc3c7; padding: 5px; color: #8e44ad;"><span t-out="'%.2f' % t['office_percentage_amount']"/></td>
+                                                </t>
+
+                                                <td style="border: 1px solid #bdc3c7; padding: 5px;"><span t-out="t['state']"/></td>
+                                            </tr>
+                                            <t t-set="idx" t-value="idx + 1"/>
+                                        </t>
+
+                                        <!-- Subtotal row for driver group -->
+                                        <tr style="background-color: #eaedd1; font-weight: bold; text-align: center;">
+                                            <td colspan="6" style="border: 1px solid #bdc3c7; padding: 6px; text-align: right;">إجمالي السائق (<span t-out="g['driver_name']"/>):</td>
+                                            <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_amount']"/></td>
+
+                                            <t t-if="g['driver_type'] == 'external'">
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_ext_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px;"><span t-out="'%.2f' % g['total_ext_comp_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #27ae60;"><span t-out="'%.2f' % g['total_driver_share']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #2980b9;"><span t-out="'%.2f' % g['total_company_share']"/></td>
+                                            </t>
+
+                                            <t t-elif="g['driver_type'] == 'commission'">
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #27ae60;"><span t-out="'%.2f' % g['total_driver_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #2980b9;"><span t-out="'%.2f' % g['total_company_comm']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #8e44ad;"><span t-out="'%.2f' % g['total_office_comm']"/></td>
+                                            </t>
+
+                                            <t t-elif="g['driver_type'] == 'percentage'">
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px;">-</td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #27ae60;"><span t-out="'%.2f' % g['total_driver_pct_amount']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #2980b9;"><span t-out="'%.2f' % g['total_company_pct_amount']"/></td>
+                                                <td style="border: 1px solid #bdc3c7; padding: 6px; color: #8e44ad;"><span t-out="'%.2f' % g['total_office_pct_amount']"/></td>
+                                            </t>
+
+                                            <td style="border: 1px solid #bdc3c7; padding: 6px;">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- Footer Signatures -->
+                        <div style="margin-top: 30px; page-break-inside: avoid;">
+                            <table style="width: 100%; text-align: center; font-size: 11px;">
+                                <tr>
+                                    <td style="width: 33%;"><strong>إعداد / الحركة</strong><br/><br/>...........................</td>
+                                    <td style="width: 33%;"><strong>المراجعة والمحاسبة</strong><br/><br/>...........................</td>
+                                    <td style="width: 34%;"><strong>اعتماد المالي</strong><br/><br/>...........................</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
