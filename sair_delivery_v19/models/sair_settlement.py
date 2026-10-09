@@ -157,6 +157,18 @@ class SairSettlement(models.Model):
                 # صافي الشركة = عمولة الشركة - مصاريف الشركة
                 rec.net_to_company = cmp_comm - cmp_exp
 
+            elif rec.driver_type == 'percentage':
+                drv_pct = sum(rec.trip_ids.mapped('driver_percentage_amount'))
+                cmp_pct = sum(rec.trip_ids.mapped('company_percentage_amount'))
+                rec.driver_revenue_share = drv_pct
+                rec.company_revenue_share = cmp_pct
+                rec.driver_expense_share = drv_exp
+                rec.company_expense_share = cmp_exp
+                # net_to_driver = مبلغ نسبة السائق + مصاريف الشركة
+                rec.net_to_driver = drv_pct + cmp_exp
+                # صافي الشركة = مبلغ نسبة الشركة - مصاريف الشركة
+                rec.net_to_company = cmp_pct - cmp_exp
+
             else:  # internal
                 rec.driver_revenue_share = 0.0
                 rec.company_revenue_share = rec.total_revenue

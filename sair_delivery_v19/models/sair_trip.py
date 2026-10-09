@@ -261,6 +261,10 @@ class SairTrip(models.Model):
             else:
                 rec.analytic_account_id = False
 
+    @api.depends(
+        'trip_amount', 'driver_type', 'company_share', 'external_company_commission',
+        'company_commission', 'company_percentage_amount',
+    )
     def _compute_expense_stats(self):
         """إحصائيات المصاريف للسمارتبوتن فقط."""
         for rec in self:
@@ -270,18 +274,18 @@ class SairTrip(models.Model):
 
             # صافي ربح الشركة (للسمارتبوتن)
             company_exp = sum(expenses.mapped('company_expense_share'))
-            net = rec.trip_amount
             if rec.driver_type == 'internal':
-                net -= rec.trip_expenses_total
+                net = rec.trip_amount - rec.trip_expenses_total
             elif rec.driver_type == 'external':
-                net -= rec.driver_share
-                net -= rec.external_commission
-                net -= company_exp
+                net = rec.company_share + rec.external_company_commission - company_exp
             elif rec.driver_type == 'commission':
-                net -= rec.driver_commission
-                net -= rec.office_commission
-                net -= company_exp
-            rec.trip_net = net
+                net = rec.company_commission - company_exp
+            elif rec.driver_type == 'percentage':
+                net = rec.company_percentage_amount - company_exp
+            else:
+                net = rec.trip_amount - company_exp
+
+            rec.trip_net = round(net, 2)
 
     def action_view_trip_expenses(self):
         self.ensure_one()
